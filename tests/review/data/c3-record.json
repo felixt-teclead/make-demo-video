@@ -1,0 +1,691 @@
+{
+"version": 1,
+"run_id": "c3-correction-loop-20260925-064809-t2",
+"source_run": "c3-correction-loop-20260925-064809-t2",
+"source_dir": "/runs/c3-correction-loop-20260925-064809-t2",
+"recut": false,
+"raw": "/runs/c3-correction-loop-20260925-064809-t2/raw.mp4",
+"width": 1920,
+"height": 1080,
+"fps": 30,
+"raw_frames": 1335,
+"params": {
+"speed_factor": 4.0,
+"fade_s": 0.2,
+"fade_frames": 6,
+"encoder": "libx264 high yuv420p crf18 veryfast",
+"skeleton_cover": {
+"max_s": 2.0,
+"hole_px": 72,
+"seam_max": 16.0,
+"ring_px": 4
+}
+},
+"clips": [
+{
+"index": 0,
+"step": 1,
+"name": "suche",
+"file": "clips/01-suche.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 4.5,
+"frames": 135,
+"source": {
+"start_t": 0.0333,
+"end_t": 4.5333,
+"start_frame": 1,
+"end_frame": 136
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 4.5,
+"src_start": 0.0333,
+"src_end": 4.5333,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "landing",
+"seconds": 1.2,
+"clip_t": 0.0,
+"clip_end": 1.2,
+"kept_seconds": 1.2,
+"src_t": 0.0081
+},
+{
+"kind": "reading",
+"seconds": 1.5,
+"clip_t": 3.0,
+"clip_end": 4.5,
+"kept_seconds": 1.5,
+"src_t": 3.0179
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 2.7333,
+"src_t": 2.738,
+"x": 1292.765625,
+"y": 25.0,
+"label": "Titel oder Beschreibung suchen…",
+"navigates": false,
+"glide_clip_t": 1.9,
+"dropped": false
+},
+{
+"type": "typing",
+"clip_t": 2.8333,
+"clip_end": 3.0
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 6.374,
+"kept_motion_frames": 1
+},
+{
+"index": 1,
+"step": 2,
+"name": "oeffnen",
+"file": "clips/02-oeffnen.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 2.8,
+"frames": 84,
+"source": {
+"start_t": 4.5333,
+"end_t": 7.3333,
+"start_frame": 136,
+"end_frame": 220
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 2.8,
+"src_start": 4.5333,
+"src_end": 7.3333,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [
+{
+"click_t": 0.6667,
+"src_t": 5.171,
+"label": "Reisekostenabrechnung",
+"x": 1104.0,
+"y": 168.25,
+"status": "covered",
+"reason": "",
+"skeleton_frames": 15,
+"seam": 8.7,
+"change_area": 0.1414,
+"hole_px": 72,
+"pre_frame": 19,
+"pre_src_frame": 155,
+"frames": [
+24,
+39
+],
+"clip_start": 0.8,
+"clip_end": 1.3,
+"covered_frames": 15,
+"src_frames": [
+160,
+175
+]
+}
+],
+"holds": [
+{
+"kind": "step",
+"seconds": 2.0,
+"clip_t": 0.8,
+"clip_end": 2.8,
+"kept_seconds": 2.0,
+"src_t": 5.3016
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 0.6667,
+"src_t": 5.171,
+"x": 1104.0,
+"y": 168.25,
+"label": "Reisekostenabrechnung",
+"navigates": false,
+"glide_clip_t": 0.3333,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 5.829,
+"kept_motion_frames": 2
+},
+{
+"index": 2,
+"step": 3,
+"name": "horizontal",
+"file": "clips/03-horizontal.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 3.4667,
+"frames": 104,
+"source": {
+"start_t": 7.3333,
+"end_t": 10.8,
+"start_frame": 220,
+"end_frame": 324
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 3.4667,
+"src_start": 7.3333,
+"src_end": 10.8,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "step",
+"seconds": 2.0,
+"clip_t": 1.4667,
+"clip_end": 3.4667,
+"kept_seconds": 2.0,
+"src_t": 8.7779
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 0.8667,
+"src_t": 8.174,
+"x": 1498.109375,
+"y": 175.0,
+"label": "Horizontal",
+"navigates": false,
+"glide_clip_t": 0.3,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 3.475,
+"kept_motion_frames": 1
+},
+{
+"index": 3,
+"step": 4,
+"name": "pan",
+"file": "clips/04-pan.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 8.0667,
+"frames": 242,
+"source": {
+"start_t": 10.8,
+"end_t": 19.1,
+"start_frame": 324,
+"end_frame": 573
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 5.5667,
+"src_start": 10.8,
+"src_end": 16.3667,
+"factor": 1.0
+},
+{
+"clip_start": 5.5667,
+"clip_end": 8.0667,
+"src_start": 16.6,
+"src_end": 19.1,
+"factor": 1.0
+}
+],
+"drops": [
+{
+"src_start": 16.3667,
+"src_end": 16.6,
+"frames": 7,
+"reason": "near-still",
+"join_mad": 0.005
+}
+],
+"declined": [],
+"splices": [
+{
+"clip_t": 5.5667,
+"frame": 167,
+"src_from": 490,
+"src_to": 498,
+"removed_frames": 7,
+"reason": "near-still",
+"in_speedup": false,
+"join_mad": 0.005
+}
+],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "step",
+"seconds": 2.0,
+"clip_t": 6.0667,
+"clip_end": 8.0667,
+"kept_seconds": 2.0,
+"src_t": 17.0801
+}
+],
+"events": [
+{
+"type": "pan",
+"clip_t": 0.0,
+"clip_end": 5.3
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 0.758,
+"kept_motion_frames": 0
+},
+{
+"index": 4,
+"step": 5,
+"name": "schritt-5",
+"file": "clips/05-schritt-5.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 4.5,
+"frames": 135,
+"source": {
+"start_t": 19.1,
+"end_t": 23.6,
+"start_frame": 573,
+"end_frame": 708
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 4.5,
+"src_start": 19.1,
+"src_end": 23.6,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "dialog",
+"seconds": 3.0,
+"clip_t": 1.5,
+"clip_end": 4.5,
+"kept_seconds": 3.0,
+"src_t": 20.5704
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 0.8667,
+"src_t": 19.95,
+"x": 1104.0,
+"y": 443.0,
+"label": "5: Abrechnung zur Korrektur zurücksenden",
+"navigates": false,
+"glide_clip_t": 0.3,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 9.306,
+"kept_motion_frames": 2
+},
+{
+"index": 5,
+"step": 6,
+"name": "vorheriger",
+"file": "clips/06-vorheriger.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 4.0333,
+"frames": 121,
+"source": {
+"start_t": 23.6,
+"end_t": 27.6333,
+"start_frame": 708,
+"end_frame": 829
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 4.0333,
+"src_start": 23.6,
+"src_end": 27.6333,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "reading",
+"seconds": 2.5,
+"clip_t": 1.5333,
+"clip_end": 4.0333,
+"kept_seconds": 2.5,
+"src_t": 25.1258
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 1.0,
+"src_t": 24.572,
+"x": 745.4921875,
+"y": 699.5,
+"label": "Vorheriger Schritt",
+"navigates": false,
+"glide_clip_t": 0.3,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 1.477,
+"kept_motion_frames": 0
+},
+{
+"index": 6,
+"step": 7,
+"name": "schliessen",
+"file": "clips/07-schliessen.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 2.8667,
+"frames": 86,
+"source": {
+"start_t": 27.6333,
+"end_t": 30.5,
+"start_frame": 829,
+"end_frame": 915
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 2.8667,
+"src_start": 27.6333,
+"src_end": 30.5,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "step",
+"seconds": 1.0,
+"clip_t": 1.8667,
+"clip_end": 2.8667,
+"kept_seconds": 1.0,
+"src_t": 29.4789
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 1.1,
+"src_t": 28.711,
+"x": 1239.0,
+"y": 431.125,
+"label": "Schließen",
+"navigates": false,
+"glide_clip_t": 0.3333,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 8.091,
+"kept_motion_frames": 3
+},
+{
+"index": 7,
+"step": 8,
+"name": "details",
+"file": "clips/08-details.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 13.7333,
+"frames": 412,
+"source": {
+"start_t": 30.5,
+"end_t": 44.5,
+"start_frame": 915,
+"end_frame": 1335
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 0.0333,
+"src_start": 30.5,
+"src_end": 30.5333,
+"factor": 1.0
+},
+{
+"clip_start": 0.0333,
+"clip_end": 13.7333,
+"src_start": 30.8,
+"src_end": 44.5,
+"factor": 1.0
+}
+],
+"drops": [
+{
+"src_start": 30.5333,
+"src_end": 30.8,
+"frames": 8,
+"reason": "standstill",
+"join_mad": 0.005
+}
+],
+"declined": [],
+"splices": [
+{
+"clip_t": 0.0333,
+"frame": 1,
+"src_from": 915,
+"src_to": 924,
+"removed_frames": 8,
+"reason": "standstill",
+"in_speedup": false,
+"join_mad": 0.005
+}
+],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "final",
+"seconds": 12.0,
+"clip_t": 1.6333,
+"clip_end": 13.6333,
+"kept_seconds": 12.0,
+"src_t": 32.3772
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 1.1,
+"src_t": 31.866,
+"x": 405.296875,
+"y": 119.0,
+"label": "Details",
+"navigates": false,
+"glide_clip_t": 0.2667,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 6.439,
+"kept_motion_frames": 1
+}
+],
+"joins": [
+{
+"between": [
+0,
+1
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 4.5
+},
+{
+"between": [
+1,
+2
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 7.3
+},
+{
+"between": [
+2,
+3
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 10.7667
+},
+{
+"between": [
+3,
+4
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 18.8333
+},
+{
+"between": [
+4,
+5
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 23.3333
+},
+{
+"between": [
+5,
+6
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 27.3667
+},
+{
+"between": [
+6,
+7
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 30.2333
+}
+],
+"full": "full.mp4",
+"full_duration": 43.9667,
+"full_frames": 1319,
+"full_expected_frames": 1319,
+"timing": {
+"analyze_s": 4.23,
+"plan_s": 0.29,
+"cover_s": 4.18,
+"render_s": 7.34,
+"join_s": 0.21,
+"total_s": 16.32,
+"raw_duration_s": 44.5
+}
+}

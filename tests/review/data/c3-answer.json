@@ -1,0 +1,160 @@
+{
+ "steps": [
+  {
+   "step": "suche",
+   "expected_visible": true,
+   "note": "Tile #12 (4.30 s) shows only the 'Reisekostenabrechnung' card. 'Urlaubsantrag' is gone."
+  },
+  {
+   "step": "oeffnen",
+   "expected_visible": true,
+   "note": "Tile #25 (7.10 s) shows the MITARBEITER and FÜHRUNGSKRAFT lane headers."
+  },
+  {
+   "step": "horizontal",
+   "expected_visible": true,
+   "note": "Tile #35 (10.57 s) shows the 'Übergabe an Führungskraft' label. The URL is not in the frame because there is no address bar, so 'orient=h' cannot be checked visually."
+  },
+  {
+   "step": "pan",
+   "expected_visible": false,
+   "note": "At the end of the pan (#45–#50), the 'Abrechnung korrekt?' card is cut off by the lane-header column and only 'nung korrekt?' is readable. The 'Rücksprung' label is no longer on screen: it was visible at #41 (13.43 s) but has slid under the lane-header column. 'Abrechnung zur Korrektur zurücksenden' is fully visible."
+  },
+  {
+   "step": "schritt-5",
+   "expected_visible": true,
+   "note": "Tile #61 (23.13 s) shows the dialog with 'Abrechnung zur Korrektur zurücksenden', 'SCHRITT 5 VON 8' and the description sentence."
+  },
+  {
+   "step": "vorheriger",
+   "expected_visible": true,
+   "note": "Tile #71 (27.17 s) shows the dialog with '04' and 'Abrechnung korrekt?', plus 'SCHRITT 4 VON 8'."
+  },
+  {
+   "step": "schliessen",
+   "expected_visible": true,
+   "note": "Tile #80 (30.03 s) shows no dialog."
+  },
+  {
+   "step": "details",
+   "expected_visible": true,
+   "note": "Tile #101 (43.77 s) shows 'Häufigkeit: ca. 40 Abrechnungen pro Monat', 'Fehlende Belege' and 'Rückfragen per E-Mail'. The URL is not in the frame, so 'tab=details' cannot be checked visually."
+  }
+ ],
+ "findings": [
+  {
+   "t": 16.07,
+   "t_end": 18.83,
+   "step": "pan",
+   "region": "Führungskraft lane, directly right of the sticky lane-header column",
+   "box": [
+    290,
+    440,
+    400,
+    150
+   ],
+   "category": "hidden_content",
+   "severity": "blocker",
+   "what": "The pan stops with the 'Abrechnung korrekt?' card partly under the sticky lane-header column. Only 'nung korrekt?' and 'heidung' can be read, and this lasts for the whole hold.",
+   "tiles": [
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52
+   ]
+  },
+  {
+   "t": 16.07,
+   "t_end": 18.83,
+   "step": "pan",
+   "region": "Führungskraft lane, dashed return line left of the cards",
+   "box": [
+    290,
+    530,
+    400,
+    50
+   ],
+   "category": "expected_missing",
+   "severity": "blocker",
+   "what": "The 'Rücksprung' label is no longer on screen at the end of the pan. It has scrolled under the lane-header column, so only the bare dashed line is left.",
+   "tiles": [
+    45,
+    49,
+    50
+   ]
+  },
+  {
+   "t": 5.3,
+   "t_end": 5.67,
+   "step": "oeffnen",
+   "region": "Around the click point on the Reisekostenabrechnung card",
+   "box": [
+    1030,
+    95,
+    160,
+    160
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "A dark disc covers the card text around the click ('ab; nach Prüfung' disappears), and a dark arc shows above the card's top edge. The disc stays after the ripple has faded (#20). It is confined to the ripple area.",
+   "tiles": [
+    17,
+    18,
+    19,
+    20
+   ]
+  },
+  {
+   "t": 5.8,
+   "t_end": 5.8,
+   "step": "oeffnen",
+   "region": "Mitarbeiter lane of the vertical swimlane view",
+   "box": [
+    310,
+    280,
+    280,
+    820
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "Half-painted frame: the arrows and the gateway are drawn but the step cards are missing. The cards are there in the next tile (+2 frames).",
+   "tiles": [
+    21,
+    22
+   ]
+  },
+  {
+   "t": 9.17,
+   "t_end": 10.73,
+   "step": "horizontal",
+   "region": "Bottom of the diagram, the automation hint next to the notation legend",
+   "box": [
+    530,
+    1040,
+    440,
+    40
+   ],
+   "category": "other",
+   "severity": "minor",
+   "what": "The orange hint 'Noch keine automatisierten Schritte — Automatisierungspotenzial' overlaps the NOTATION legend bar, so both are partly covered.",
+   "tiles": [
+    33,
+    34,
+    35,
+    36
+   ]
+  }
+ ],
+ "model": "claude-opus-5-5",
+ "tokens": {
+  "input": 112944,
+  "output": 3616
+ },
+ "seconds": 45.3,
+ "agent_cost_usd": 0.8471405999999999,
+ "runner": "claude -p (one turn)"
+}

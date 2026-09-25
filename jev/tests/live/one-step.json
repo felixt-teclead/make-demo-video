@@ -1,0 +1,14 @@
+[
+ {
+  "name": "details",
+  "op": "click",
+  "target": {
+   "label": "Details anzeigen",
+   "role": "button"
+  },
+  "check": {
+   "type": "dialog_open",
+   "value": "Schritt 1 von 3"
+  }
+ }
+]

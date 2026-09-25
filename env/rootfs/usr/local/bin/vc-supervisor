@@ -1,0 +1,72 @@
+#!/bin/bash
+# vc-v1 in-container supervisor: Xvfb, Chrome (kiosk, auto-restart), x11vnc + noVNC, test-page server, recorder API.
+# Every child that exits is restarted (C-15: the browser restarts on its own after a crash).
+set -u
+SCREEN="${VC_SCREEN:-1920x1080}"
+LOG=/tmp/vc-logs; mkdir -p "$LOG"
+declare -A PIDS FAILS LAST
+
+log() { printf '%s supervisor: %s\n' "$(date -u +%FT%T.%3NZ)" "$*" | tee -a "$LOG/supervisor.log" >&2; }
+
+# Remote-view password: generated once, kept in /state (mode 600); never printed.
+if [ ! -s /state/vnc-password ]; then
+  (umask 077; head -c 12 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 12 > /state/vnc-password)
+fi
+chmod 600 /state/vnc-password
+# x11vnc reads the password from the file itself (-passwdfile): it never appears in a command line (ps).
+
+chmod 700 /profile
+
+start_xvfb()   { Xvfb :99 -screen 0 "${SCREEN}x24" -dpi 96 -nolisten tcp -nocursor >"$LOG/xvfb.log" 2>&1 & PIDS[xvfb]=$!; }
+start_chrome() { /usr/local/bin/vc-chrome >>"$LOG/chrome.log" 2>&1 & PIDS[chrome]=$!; }
+start_vnc()    { x11vnc -display :99 -passwdfile /state/vnc-password -localhost -rfbport 5900 -forever -shared -quiet -noxdamage >"$LOG/x11vnc.log" 2>&1 & PIDS[vnc]=$!; }
+start_novnc()  { websockify --web /usr/share/novnc 0.0.0.0:6080 127.0.0.1:5900 >"$LOG/novnc.log" 2>&1 & PIDS[novnc]=$!; }
+start_www()    { python3 -m http.server 8099 --bind 127.0.0.1 --directory /opt/vc/env/www >"$LOG/www.log" 2>&1 & PIDS[www]=$!; }
+start_rec()    { python3 /opt/vc/env/recorder/recorder.py >>"$LOG/recorder.log" 2>&1 & PIDS[rec]=$!; }
+
+wait_x() { for _ in $(seq 100); do [ -e /tmp/.X11-unix/X99 ] && return 0; sleep 0.1; done; return 1; }
+
+# Graceful stop within compose's stop_grace_period (30 s): first the recorder finalises a running recording (raw.mp4
+# + manifest.json) while Xvfb still runs, then Chrome flushes its profile, then the rest.
+shutdown() {
+  log "stopping"
+  if [ -n "${PIDS[rec]:-}" ] && kill -0 "${PIDS[rec]}" 2>/dev/null; then
+    if curl -fsS --max-time 2 http://127.0.0.1:7777/record/status 2>/dev/null | grep -q '"recording": "'; then
+      log "finalising the running recording"
+      curl -sS --max-time 20 -X POST -H 'Content-Type: application/json' -d '{}' \
+        http://127.0.0.1:7777/record/stop >/dev/null 2>&1 || log "record/stop failed; the recorder's TERM handler retries"
+    fi
+    kill -TERM "${PIDS[rec]}" 2>/dev/null        # its TERM handler also finalises a recording that is still running
+    for _ in $(seq 200); do kill -0 "${PIDS[rec]}" 2>/dev/null || break; sleep 0.1; done
+  fi
+  pkill -TERM -f '/opt/google/chrome/chrome' 2>/dev/null           # graceful: Chrome flushes cookies
+  for _ in $(seq 50); do pgrep -f '/opt/google/chrome/chrome' >/dev/null || break; sleep 0.1; done
+  kill -TERM "${PIDS[@]}" 2>/dev/null
+  exit 0
+}
+trap shutdown TERM INT
+
+start_xvfb; wait_x || { log "Xvfb did not start"; exit 1; }
+start_chrome; start_vnc; start_novnc; start_www; start_rec
+log "started: ${!PIDS[*]}"
+
+while true; do
+  for name in xvfb chrome vnc novnc www rec; do
+    if ! kill -0 "${PIDS[$name]}" 2>/dev/null; then
+      # back off when a child keeps dying within 10 s of its start (1 s, 2 s, 4 s ... max 60 s)
+      t=$(date +%s)
+      if [ $((t - ${LAST[$name]:-0})) -lt 10 ]; then FAILS[$name]=$(( ${FAILS[$name]:-0} + 1 )); else FAILS[$name]=0; fi
+      delay=$(( 1 << (${FAILS[$name]} > 6 ? 6 : ${FAILS[$name]}) )); [ $delay -gt 60 ] && delay=60
+      log "$name exited; restarting in ${delay}s"
+      sleep "$delay"; LAST[$name]=$(date +%s)
+      echo "$(date +%s.%N) $name" >> "$LOG/restarts.log"
+      [ "$name" = xvfb ] && { start_xvfb; wait_x; }
+      [ "$name" = chrome ] && start_chrome
+      [ "$name" = vnc ] && start_vnc
+      [ "$name" = novnc ] && start_novnc
+      [ "$name" = www ] && start_www
+      [ "$name" = rec ] && start_rec
+    fi
+  done
+  sleep 1 & wait $!
+done

@@ -1,0 +1,172 @@
+{
+ "fingerprint": "sha256:9bbff9a92d5ec3c1",
+ "approval": {
+  "approved_at": "2026-09-25T05:20:06+00:00",
+  "writes": [],
+  "assumptions": [
+   "login: live stored session",
+   "8 steps (brief), above the 3-7 default: kept as briefed"
+  ],
+  "approver": "unattended, from instruction sha256:8a0554717da85de6",
+  "mode": "unattended",
+  "instruction": "sha256:8a0554717da85de6",
+  "fingerprint": "sha256:9bbff9a92d5ec3c1"
+ },
+ "contract": {
+  "steps": [
+   {
+    "name": "suche",
+    "does": "type \"Reise\" into the search field; one card is left",
+    "expect": [
+     {
+      "type": "element_visible",
+      "role": "link",
+      "label": "Reisekostenabrechnung",
+      "count": 1
+     },
+     {
+      "type": "text_absent",
+      "value": "Urlaubsantrag"
+     }
+    ],
+    "write": null,
+    "typed": [
+     "Reise"
+    ]
+   },
+   {
+    "name": "oeffnen",
+    "does": "click the card \"Reisekostenabrechnung\"",
+    "expect": [
+     {
+      "type": "text_visible",
+      "value": "MITARBEITER"
+     },
+     {
+      "type": "text_visible",
+      "value": "FÜHRUNGSKRAFT"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "horizontal",
+    "does": "click the layout button \"Horizontal\" (left-right arrow next to the view buttons)",
+    "expect": [
+     {
+      "type": "url_contains",
+      "value": "orient=h"
+     },
+     {
+      "type": "text_visible",
+      "value": "Übergabe an Führungskraft"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "pan",
+    "does": "pan sideways to the decision, the dashed loop back and step 5",
+    "expect": [
+     {
+      "type": "text_visible",
+      "value": "Abrechnung korrekt?"
+     },
+     {
+      "type": "text_visible",
+      "value": "Rücksprung"
+     },
+     {
+      "type": "text_visible",
+      "value": "Abrechnung zur Korrektur zurücksenden"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "schritt-5",
+    "does": "click step 5 \"Abrechnung zur Korrektur zurücksenden\"",
+    "expect": [
+     {
+      "type": "dialog_open",
+      "value": "Abrechnung zur Korrektur zurücksenden"
+     },
+     {
+      "type": "text_visible",
+      "value": "SCHRITT 5 VON 8"
+     },
+     {
+      "type": "text_visible",
+      "value": "Bei Fehlern geht die Abrechnung zur Korrektur zurück zum Mitarbeiter."
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "vorheriger",
+    "does": "click \"Vorheriger Schritt\" in the dialog",
+    "expect": [
+     {
+      "type": "dialog_open",
+      "value": "04 Abrechnung korrekt?"
+     },
+     {
+      "type": "text_visible",
+      "value": "SCHRITT 4 VON 8"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "schliessen",
+    "does": "close the dialog with its close button",
+    "expect": [
+     {
+      "type": "dialog_closed"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "details",
+    "does": "click the tab \"Details\"",
+    "expect": [
+     {
+      "type": "url_contains",
+      "value": "tab=details"
+     },
+     {
+      "type": "text_visible",
+      "value": "Häufigkeit"
+     },
+     {
+      "type": "text_visible",
+      "value": "ca. 40 Abrechnungen pro Monat"
+     },
+     {
+      "type": "text_visible",
+      "value": "Fehlende Belege"
+     },
+     {
+      "type": "text_visible",
+      "value": "Rückfragen per E-Mail"
+     }
+    ],
+    "write": null,
+    "typed": []
+   }
+  ],
+  "writes": [],
+  "final_hold": 12.0,
+  "length": [
+   35,
+   60
+  ]
+ }
+}

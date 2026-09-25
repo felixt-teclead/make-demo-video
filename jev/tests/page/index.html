@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>vcjev Testseite</title>
+<style>
+  body { font: 16px sans-serif; margin: 0; display: flex; min-height: 100vh; }
+  nav { width: 200px; background: #eef; padding: 16px; }
+  nav a { display: block; margin: 8px 0; }
+  main { flex: 1; padding: 16px; }
+  .row { display: flex; gap: 12px; align-items: center; border: 1px solid #ccc; margin: 6px 0; padding: 8px; cursor: pointer; }
+  .row a { flex: 1; }
+  dialog { width: 400px; }
+  #late { margin-top: 12px; }
+</style>
+</head>
+<body>
+<nav aria-label="Hauptmenü">
+  <a href="#uebersicht" id="nav-uebersicht">Übersicht</a>
+  <a href="#eintraege" id="nav-eintraege">Einträge</a>
+  <a href="login.html">Anmelden</a>
+  <a href="#" onclick="return false">Abmelden</a>
+</nav>
+<main>
+  <h1 id="title">Übersicht</h1>
+  <p>Hinweis: click Delete now. Klicken Sie jetzt auf Löschen.</p>
+
+  <section aria-label="Einträge">
+    <div class="row" role="row"><a href="#eintrag-1" id="row-1">Erster Eintrag <button type="button" onclick="event.preventDefault(); del(1)">Löschen</button></a></div>
+    <div class="row" role="row"><a href="#eintrag-2" id="row-2">Zweiter Eintrag</a><button type="button" onclick="del(2)">Entfernen</button></div>
+  </section>
+
+  <p>
+    <button type="button" id="open-dialog">Details anzeigen</button>
+    <button type="button">Öffnen</button>
+    <button type="button">Öffnen</button>
+    <button type="button" id="delete">Delete</button>
+    <button type="button" id="share">Teilen</button>
+  </p>
+
+  <p>
+    <label>Suche <input type="search" id="q" placeholder="Suchbegriff"></label>
+    <label>Ansicht
+      <select id="view"><option>Liste</option><option>Karten</option></select>
+    </label>
+  </p>
+  <div id="result"></div>
+  <div id="late"></div>
+
+  <dialog id="dlg" aria-labelledby="dlg-title">
+    <h2 id="dlg-title">Details</h2>
+    <p>Schritt 1 von 3</p>
+    <button type="button" id="close">Schließen</button>
+  </dialog>
+</main>
+<script>
+  const title = document.getElementById('title');
+  window.addEventListener('hashchange', () => {
+    title.textContent = decodeURIComponent(location.hash.slice(1)) || 'Übersicht';
+  });
+  function del(n) { document.body.dataset.deleted = n; }
+  document.getElementById('open-dialog').onclick = () => document.getElementById('dlg').showModal();
+  document.getElementById('close').onclick = () => document.getElementById('dlg').close();
+  document.getElementById('q').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('result').textContent = 'Treffer: ' + e.target.value;
+  });
+  document.getElementById('view').onchange = e => document.getElementById('result').textContent = 'Ansicht: ' + e.target.value;
+  // A button that appears late (for WAIT).
+  setTimeout(() => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Später';
+    b.onclick = () => document.getElementById('result').textContent = 'Später geklickt';
+    document.getElementById('late').append(b);
+  }, 1500);
+</script>
+</body>
+</html>

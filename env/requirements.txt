@@ -1,0 +1,11 @@
+# The ONE Python requirements file of vc-v1: everything installed into /opt/venv in the recorder image.
+# Host scripts (bin/vc-loop, bin/vc-spec, bin/vc-lock, the plugin hooks) use the host's python3 stdlib only (C-19).
+# Every line maps to a run phase (C-29):
+#   jev wrapper (vcjev, take/dry run/cleanup): httpx, websocket-client, jev-ultrafast
+#   QA gate (vcgate, QA phase): numpy
+# jev-ultrafast is installed with --no-deps (its browser-harness dependency is replaced by vcjev.cdp; see
+# docs/jev-interface.md); env/Dockerfile installs the line marked "no-deps" separately.
+httpx[http2]>=0.28,<1
+websocket-client>=1.8,<2
+numpy>=2.0,<3
+jev-ultrafast @ https://github.com/browser-use/jev-ultrafast/archive/1231850a0bf1a0c0341fe408ef1668dbbfdfac46.tar.gz  # no-deps

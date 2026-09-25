@@ -1,0 +1,137 @@
+# Golden case 3 (acceptance/cases.md): "Follow the correction loop" (never filmed; tests generalisation).
+# Controls and routes explored live with jev on 2026-09-25 (vcloop.explore; record under explore/c3-correction-loop/).
+format = "vc-spec/1"
+name = "c3-correction-loop"
+title = "Der Korrekturweg einer Reisekostenabrechnung"
+purpose = "Show how a process with a decision and a loop back reads: the viewer sees the loop in the diagram and reads the decision and the correction step."
+context = "This is an intended look at one process; the search and the layout switch only change view state, nothing is saved (read-only)."
+length = [35, 60]
+deny = ["Mehr Details"]
+site_switches = []
+writes = []
+
+[params]
+start_url = "https://app.example.com/de/processes"   # explored 2026-09-25
+search = "Reise"
+process = "Reisekostenabrechnung"
+step5 = "Abrechnung zur Korrektur zurücksenden"
+decision = "Abrechnung korrekt?"
+frequency = "ca. 40 Abrechnungen pro Monat"   # shown as "Häufigkeit: ca. 40 …"; label and value are separate text nodes
+
+[start]
+url = "{start_url}"
+ready = [{ type = "text_visible", value = "Meine" }, { type = "element_visible", role = "link", label = "{process}" }]
+warm = ["https://app.example.com/de/processes/<process-id>"]   # off camera (c1/c2 showed a loading skeleton on cold routes)
+hold = 1.2
+
+[[preconditions]]
+what = "The search runs under 'Meine', so the organisation's 'TEST - Monatliche Reisekostenabrechnung' is not listed."
+by = "setup"
+check = [{ type = "text_visible", value = "Meine" }]
+
+[[preconditions]]
+what = "The process opens in its default vertical layout when opened without parameters (also after the take)."
+by = "human"
+
+[privacy]
+account = "the owner's own account in the app (OD-05)"
+shown = "sidebar chat titles, the owner's full name and organisation; 'Beteiligte Personen' shows role names only"
+why_ok = "the owner accepted these (OD-05, no blur in v1); 'Mehr Details', 'Zusammenarbeit' and the 'Organisation' tab are never offered"
+
+[[steps]]
+name = "suche"
+does = 'type "Reise" into the search field; one card is left'
+hold = 1.5
+hold_kind = "reading"
+expect = [{ type = "element_visible", role = "link", label = "{process}", count = 1 }, { type = "text_absent", value = "Urlaubsantrag" }]
+  [[steps.actions]]
+  op = "type"
+  control = { label = "Titel oder Beschreibung suchen…", role = "textbox" }
+  where = "the search field above the process list"
+  text = "{search}"
+
+[[steps]]
+name = "oeffnen"
+does = 'click the card "Reisekostenabrechnung"'
+hold = 2.0
+expect = [{ type = "text_visible", value = "MITARBEITER" }, { type = "text_visible", value = "FÜHRUNGSKRAFT" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "{process}", role = "link" }
+  where = "the only card left in the filtered list"
+
+[[steps]]
+name = "horizontal"
+does = 'click the layout button "Horizontal" (left-right arrow next to the view buttons)'
+hold = 2.0
+expect = [{ type = "url_contains", value = "orient=h" }, { type = "text_visible", value = "Übergabe an Führungskraft" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Horizontal", role = "radio", within = "radiogroup Ausrichtung" }
+  where = "the small left-right arrow icon next to the view buttons (its twin is 'Vertikal')"
+
+[[steps]]
+name = "pan"
+does = "pan sideways to the decision, the dashed loop back and step 5"
+hold = 2.0
+expect = [{ type = "text_visible", value = "{decision}" }, { type = "text_visible", value = "Rücksprung" }, { type = "text_visible", value = "{step5}" }]
+  [[steps.actions]]
+  op = "pan"
+  to = { type = "text_visible", value = "{step5}" }
+  direction = "right"
+  seconds = 3.0
+  pause_animations = true   # the dashed connectors march; pause them during the move only (Q-31)
+
+[[steps]]
+name = "schritt-5"
+does = 'click step 5 "Abrechnung zur Korrektur zurücksenden"'
+hold = 3.0
+hold_kind = "dialog"
+expect = [{ type = "dialog_open", value = "{step5}" }, { type = "text_visible", value = "SCHRITT 5 VON 8" }, { type = "text_visible", value = "Bei Fehlern geht die Abrechnung zur Korrektur zurück zum Mitarbeiter." }]
+  [[steps.actions]]
+  op = "click"
+  control = { label_contains = "zur Korrektur zurücksenden", role = "button", within = "application" }
+  where = "the step 5 card in the FÜHRUNGSKRAFT row"
+
+[[steps]]
+name = "vorheriger"
+does = 'click "Vorheriger Schritt" in the dialog'
+hold = 2.5
+hold_kind = "reading"
+expect = [{ type = "dialog_open", value = "04 {decision}" }, { type = "text_visible", value = "SCHRITT 4 VON 8" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Vorheriger Schritt", within = "dialog" }
+  where = "the 'Vorheriger Schritt' button inside the open step dialog"
+
+[[steps]]
+name = "schliessen"
+does = "close the dialog with its close button"
+hold = 1.0
+expect = [{ type = "dialog_closed" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Schließen", within = "dialog" }
+  where = "the close (×) button inside the open step dialog"
+
+[[steps]]
+name = "details"
+does = 'click the tab "Details"'
+hold = 12.0
+hold_kind = "final"
+expect = [{ type = "url_contains", value = "tab=details" }, { type = "text_visible", value = "Häufigkeit" }, { type = "text_visible", value = "{frequency}" }, { type = "text_visible", value = "Fehlende Belege" }, { type = "text_visible", value = "Rückfragen per E-Mail" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Details", role = "link", within = "navigation" }
+  where = "the tab row of the process"
+
+[knobs]
+
+[approval]
+approver = "unattended, from instruction sha256:8a0554717da85de6"
+approved_at = "2026-09-25T05:20:06+00:00"
+mode = "unattended"
+fingerprint = "sha256:9bbff9a92d5ec3c1"
+instruction = "sha256:8a0554717da85de6"
+writes = []
+assumptions = ["login: live stored session", "8 steps (brief), above the 3-7 default: kept as briefed"]

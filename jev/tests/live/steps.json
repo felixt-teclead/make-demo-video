@@ -1,0 +1,12 @@
+[
+  {"name": "details", "op": "click", "target": {"label": "Details anzeigen", "role": "button"},
+   "check": {"type": "dialog_open", "value": "Schritt 1 von 3"}},
+  {"name": "schliessen", "op": "click", "target": {"label": "Schließen", "within": "dialog"},
+   "check": {"type": "dialog_closed"}},
+  {"name": "eintrag", "op": "click", "target": {"label": "Erster Eintrag", "role": "link"},
+   "check": {"type": "url_contains", "value": "#eintrag-1"}},
+  {"name": "suche", "op": "type", "target": {"label": "Suche"}, "text": "Zweiter  Eintrag", "submit": true,
+   "check": {"type": "text_visible", "value": "Treffer: Zweiter Eintrag"}},
+  {"name": "ansicht", "op": "select", "target": {"label": "Ansicht", "option": "Karten"},
+   "check": {"type": "text_visible", "value": "Ansicht: Karten"}}
+]

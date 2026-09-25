@@ -1,0 +1,125 @@
+{
+ "what": "jev decision latency A/B, same time window, two concurrent processes (gap variant: 8 s idle between decisions), vc-v1-recorder image, user-defined docker bridge, typesafe/jev-1.13 via OpenRouter /api/v1/systemone. Produced by jev/tests/bench_latency.py --variants warm,gap --gap 8 --n 15.",
+ "committed_e950036": {
+  "measured": "2026-09-25T04:37:25+0000",
+  "warm_ms": null,
+  "results": [
+   {
+    "variant": "warm",
+    "n": 15,
+    "median_ms": 265,
+    "p90_ms": 321,
+    "min_ms": 230,
+    "max_ms": 350,
+    "first_ms": 285,
+    "failed": 0,
+    "ms": [
+     285,
+     259,
+     244,
+     264,
+     296,
+     276,
+     321,
+     261,
+     252,
+     238,
+     268,
+     230,
+     265,
+     284,
+     350
+    ]
+   },
+   {
+    "variant": "gap",
+    "n": 15,
+    "median_ms": 274,
+    "p90_ms": 341,
+    "min_ms": 244,
+    "max_ms": 355,
+    "first_ms": 244,
+    "failed": 0,
+    "ms": [
+     244,
+     341,
+     270,
+     254,
+     270,
+     315,
+     274,
+     299,
+     294,
+     261,
+     273,
+     290,
+     275,
+     355,
+     267
+    ]
+   }
+  ]
+ },
+ "cp-B-jev-latency": {
+  "measured": "2026-09-25T04:37:25+0000",
+  "warm_ms": 35,
+  "results": [
+   {
+    "variant": "warm",
+    "n": 15,
+    "median_ms": 285,
+    "p90_ms": 329,
+    "min_ms": 229,
+    "max_ms": 360,
+    "first_ms": 261,
+    "failed": 0,
+    "ms": [
+     261,
+     258,
+     294,
+     296,
+     282,
+     285,
+     256,
+     296,
+     266,
+     329,
+     311,
+     360,
+     229,
+     305,
+     239
+    ]
+   },
+   {
+    "variant": "gap",
+    "n": 15,
+    "median_ms": 272,
+    "p90_ms": 288,
+    "min_ms": 237,
+    "max_ms": 292,
+    "first_ms": 292,
+    "failed": 0,
+    "ms": [
+     292,
+     288,
+     241,
+     274,
+     283,
+     283,
+     262,
+     268,
+     272,
+     237,
+     266,
+     274,
+     246,
+     239,
+     283
+    ]
+   }
+  ]
+ },
+ "earlier_2026-09-25_single_runs_committed_code": "warm 269/319, cold client per call 286/306, http1.1 260/300, full element table 276/319, 6000-char text 269/442, gap 6 s 288/342, gap 90 s 334/492 (median/p90 ms, n=20 or 7); one 'Model connection failed' after a 30 s idle gap (1 of ~45 gap calls)",
+ "reference_2026-09-24_m2": "2177-3255 ms, mean 2.8 s, n=5 (not reproducible; no per-attempt record existed)"
+}

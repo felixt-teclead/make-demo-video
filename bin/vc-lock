@@ -1,0 +1,40 @@
+#!/bin/sh
+# The one browser lock (C-18): vc-lock <label> <command> [args...]
+# Waits up to VC_LOCK_TIMEOUT s (F-23 default 600), then exits 75. Every wait/acquire/release/timeout goes to
+# lock.log as one JSON line. Works on the host (settings file) and in the container (/state).
+# vc-lock --show-timeout prints the timeout in force and exits.
+[ $# -ge 2 ] || [ "${1:-}" = --show-timeout ] || { echo "usage: vc-lock <label> <command> [args...]" >&2; exit 64; }
+label=$1; shift
+# Timeout precedence: VC_LOCK_TIMEOUT in the environment (the loop sets it from the knob lock_timeout_s, F-23)
+# > VC_LOCK_TIMEOUT in the settings file > the knob table's default (loop/vcloop/knobs.py).
+env_timeout=${VC_LOCK_TIMEOUT:-}
+here=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if [ -d /state ] && [ -n "${VC_STATE:-}" ]; then
+  state=$VC_STATE; file_timeout=
+else
+  . "$here/bin/vc-lib.sh"; vc_load; state=$VC_STATE_ABS; file_timeout=${VC_LOCK_TIMEOUT:-}
+  mkdir -p "$state"
+fi
+timeout=${env_timeout:-$file_timeout}
+if [ -z "$timeout" ]; then
+  timeout=$(python3 -c 'import sys; sys.path.insert(0, sys.argv[1]); from vcloop.knobs import TABLE; print(TABLE["lock_timeout_s"][0])' "$here/loop" 2>/dev/null || echo 600)
+fi
+case $timeout in ''|*[!0-9.]*) echo "vc-lock: bad VC_LOCK_TIMEOUT: $timeout" >&2; exit 64 ;; esac
+[ "$label" = --show-timeout ] && { echo "$timeout"; exit 0; }
+lockf=$state/browser.lock
+logf=$state/lock.log
+host=$(hostname 2>/dev/null || echo unknown)
+jlabel=$(printf '%s' "$label" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+logev() { python3 -c 'import time,sys; print("{\"t\":%.6f,\"event\":\"%s\",\"label\":%s,\"pid\":%s,\"host\":\"%s\"}" % (time.time(), *sys.argv[1:]))' "$1" "$jlabel" "$$" "$host" >> "$logf"; }
+exec 9>>"$lockf"
+logev wait
+if ! flock -w "$timeout" 9; then
+  logev timeout
+  echo "vc-lock: browser lock not free after ${timeout}s (holder: see $logf)" >&2
+  exit 75
+fi
+logev acquired
+"$@"
+rc=$?
+logev released
+exit $rc

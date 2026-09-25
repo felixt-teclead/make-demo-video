@@ -1,0 +1,25 @@
+{
+  "_note": "Example login profile for the optional scripted login (F-26 b); app specifics live only here (C-40). Placeholders: set start_url to a page that redirects to the login form when logged out and shows the app when logged in; set the CSS selectors of the user field, the password field and the submit button of your app's login form. The credentials are read inside the container from the env file variables named below.",
+  "start_url": "https://app.example.com/",
+  "credentials": {
+    "user_var": "APP_USER",
+    "pass_var": "APP_PASS"
+  },
+  "form": {
+    "user": "input[type=email], input[name=email], input[autocomplete=username]",
+    "password": "input[type=password]",
+    "submit": "form button[type=submit]",
+    "two_step": false
+  },
+  "logged_in": {
+    "url_prefix": "https://app.example.com/",
+    "url_not_contains": [
+      "login",
+      "signin",
+      "auth"
+    ]
+  },
+  "human_markers": [],
+  "settle_s": 2.0,
+  "timeout_s": 30
+}

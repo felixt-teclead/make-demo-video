@@ -1,0 +1,98 @@
+# Case W (F-09): a write case on the fixture test page (Q-91). Same shape as case 2, but one step creates an item.
+# Refused without recorded approval, accepted after it; its items are cleaned up after delivery (C-34, OD-26).
+format = "vc-spec/1"
+name = "w-fixture-write"
+title = "Einen Eintrag anlegen und lesen"
+purpose = "Show that an item can be created, found and read on the fixture page."
+context = "This is an intended demo on the local fixture page; one approved step creates one item, which is deleted after delivery."
+length = [20, 45]
+preconditions = []
+deny = []
+site_switches = []
+
+[params]
+start_url = "http://127.0.0.1:8099/fixture/index.html"   # the fixture page (Q-91), env/www/fixture/
+
+[start]
+url = "{start_url}"
+ready = [{ type = "text_visible", value = "Einträge" }]
+warm = []
+hold = 1.2
+
+[privacy]
+account = "no account: a local test page"
+shown = "only synthetic items"
+why_ok = "nothing on the page is real data"
+
+[[writes]]
+id = "create-item"
+step = "anlegen"
+changes = "adds one item named {unique} to the page's local item store"
+labels = ["Erstellen"]
+cleanup = { op = "click", control = { label = "Löschen", within = "{item}" }, check = [{ type = "text_absent", value = "{item}" }] }
+
+[[steps]]
+name = "eintraege"
+does = 'click "Einträge" in the navigation'
+hold = 1.5
+expect = [{ type = "text_visible", value = "Neuer Eintrag" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Einträge", within = "navigation" }
+  where = "the 'Einträge' link in the page navigation"
+
+[[steps]]
+name = "anlegen"
+does = 'type a unique name and click "Erstellen"'
+write = "create-item"
+hold = 2.0
+expect = [{ type = "element_visible", label_contains = "{unique}", count = 1 }]
+  [[steps.actions]]
+  op = "type"
+  control = { label = "Name des Eintrags" }
+  where = "the name field of the 'Neuer Eintrag' form"
+  text = "{unique}"
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Erstellen" }
+  where = "the 'Erstellen' button of the 'Neuer Eintrag' form"
+
+[[steps]]
+name = "oeffnen"
+does = "open the new item"
+hold = 3.0
+hold_kind = "dialog"
+expect = [{ type = "dialog_open", value = "{unique}" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "{unique}", within = "row" }
+  where = "the new item's row in the list"
+
+[[steps]]
+name = "schliessen"
+does = "close the item dialog"
+hold = 1.0
+expect = [{ type = "dialog_closed" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Schließen", within = "dialog" }
+  where = "the close button inside the item dialog"
+
+[[steps]]
+name = "details"
+does = 'click the tab "Details"'
+hold = 12.0
+hold_kind = "final"
+expect = [{ type = "text_visible", value = "Anzahl Einträge" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Details", role = "tab" }
+  where = "the tab row of the page"
+
+[knobs]
+
+[approval]
+approver = ""
+approved_at = ""
+fingerprint = ""
+writes = []

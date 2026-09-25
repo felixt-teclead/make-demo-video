@@ -1,0 +1,17 @@
+{
+  "description": "vc-v1 guards (F-19): the QA definition and approvals, the credentials, and the fixer's read-only shell; every tool is checked (credentials in any tool input).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

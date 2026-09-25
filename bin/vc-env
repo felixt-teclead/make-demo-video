@@ -1,0 +1,42 @@
+#!/bin/sh
+# Host CLI for the recorder environment. All values come from the settings file (C-21). See docs/interfaces.md.
+set -eu
+. "$(dirname -- "$0")/vc-lib.sh"
+cmd=${1:-help}; [ $# -gt 0 ] && shift
+if [ "$cmd" = init ]; then
+  [ -f "$VC_SETTINGS" ] || { cp "$VC_ROOT/settings.example.env" "$VC_SETTINGS"; echo "created $VC_SETTINGS; edit it"; }
+  exit 0
+fi
+case $cmd in help|-h|--help)
+  echo "usage: vc-env init|preflight|build|up|down|restart|status|health|url|exec|check|ports|size|logs"; exit 0;; esac
+vc_load
+api() { curl -fsS --max-time "${2:-10}" "http://$VC_BIND:$VC_CONTROL_PORT$1"; }
+
+case $cmd in
+  preflight) exec "$VC_ROOT/bin/vc-preflight" --env ;;
+  build) vc_compose build "$@" ;;
+  up)
+    "$VC_ROOT/bin/vc-preflight" --env
+    mkdir -p "$VC_RUNS_ABS" "$VC_STATE_ABS"
+    vc_compose up -d "$@"
+    i=0; until api /health 3 >/dev/null 2>&1; do
+      i=$((i+1)); [ $i -lt 60 ] || vc_die "environment not healthy after 60 s (bin/vc-env logs)"; sleep 1; done
+    echo "healthy"; "$0" url ;;
+  down) vc_compose down "$@" ;;
+  restart) vc_compose restart "$@"
+    i=0; until api /health 3 >/dev/null 2>&1; do i=$((i+1)); [ $i -lt 60 ] || vc_die "not healthy"; sleep 1; done
+    echo "healthy" ;;
+  status) vc_compose ps; api /record/status 3 && echo || true ;;
+  health) api /health 5; echo ;;
+  url)
+    echo "remote view: http://$VC_BIND:$VC_VNC_PORT/vnc.html?autoconnect=1&resize=scale"
+    echo "password:    in $VC_STATE_ABS/vnc-password (mode 600)" ;;
+  exec)
+    tty=""; if [ "${1:-}" = -i ]; then tty="-i"; shift; fi
+    exec docker exec $tty -u "$VC_UID:$VC_GID" -w /opt/vc "$VC_CONTAINER_NAME" "$@" ;;
+  check) exec docker exec -u "$VC_UID:$VC_GID" -w /opt/vc "$VC_CONTAINER_NAME" python3 /opt/vc/env/checks/check_env.py "$@" ;;
+  ports) exec python3 "$VC_ROOT/env/checks/check_ports.py" ;;
+  size) docker image inspect "$VC_IMAGE" --format '{{.Size}}' | python3 -c 'import sys; b=int(sys.stdin.read()); print("%s %.2f GB (%d bytes) %s" % (sys.argv[1], b/1e9, b, "OK <5GB" if b < 5e9 else "FAIL >=5GB"))' "$VC_IMAGE" ;;
+  logs) docker exec "$VC_CONTAINER_NAME" sh -c 'tail -n 50 /tmp/vc-logs/*.log' ;;
+  *) vc_die "unknown command: $cmd" ;;
+esac

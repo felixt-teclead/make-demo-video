@@ -1,0 +1,8 @@
+{"lock": null,
+ "login_check": ["python3", "{fakes}/fake_login.py"],
+ "run": ["python3", "{fakes}/fake_runner.py", "{request}"],
+ "cut": ["python3", "{fakes}/stub_cut.py", "{run_dir}"],
+ "gate": ["python3", "{fakes}/stub_gate.py", "{run_dir}"],
+ "review": ["python3", "{fakes}/fake_framecheck.py", "{request}"],
+ "fixer": ["python3", "{fakes}/fake_fixer.py", "{request}"],
+ "protected": ["{fakes}/stub_gate.py"]}

@@ -1,0 +1,51 @@
+{
+  "_comment": "C-04 models config. No endpoint, format, price or version is fixed in code. 'default' is the standard version; older versions stay listed for rollback; 'candidate' is a version under acceptance. Prices are USD per 1M tokens and are used only when the provider response carries no cost (F-28).",
+  "provider": "openrouter",
+  "providers": {
+    "openrouter": {
+      "jev_url": "https://openrouter.ai/api/v1/systemone",
+      "jev_format": "typesafe",
+      "text_base_url": "https://openrouter.ai/api/v1",
+      "text_format": "openai-chat",
+      "key_var": "OPENROUTER_API_KEY"
+    },
+    "typesafe": {
+      "jev_url": "https://api.typesafe.ai/v1/systemone",
+      "jev_format": "typesafe",
+      "text_base_url": "https://openrouter.ai/api/v1",
+      "text_format": "openai-chat",
+      "key_var": "TYPESAFE_API_KEY"
+    },
+    "stub": {
+      "jev_url": "http://127.0.0.1:7819/v1/systemone",
+      "jev_format": "typesafe",
+      "text_base_url": "http://127.0.0.1:7819/v1",
+      "text_format": "openai-chat",
+      "key_var": "STUB_API_KEY"
+    }
+  },
+  "jev": {
+    "default": "typesafe/jev-1.13",
+    "candidate": null,
+    "versions": {
+      "typesafe/jev-1.13": {
+        "verified": "2026-09-24",
+        "price_per_mtok": {"input": 0.042, "output": 0.0},
+        "price_note": "derived 2026-09-24 from OpenRouter usage.cost on 4 live decisions (cost = 4.2e-8 x input tokens exactly); used only when a response carries no cost"
+      }
+    },
+    "history": ["typesafe/jev-1.13"]
+  },
+  "text_helper": {
+    "default": "inception/mercury-2.5",
+    "candidate": null,
+    "reasoning": "none",
+    "versions": {
+      "inception/mercury-2.5": {
+        "verified": "2026-09-24",
+        "price_per_mtok": {"input": 0.04, "output": 0.15}
+      }
+    },
+    "history": ["inception/mercury-2.5"]
+  }
+}

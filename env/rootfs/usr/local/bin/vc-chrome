@@ -1,0 +1,57 @@
+#!/bin/bash
+# Launch the one Google Chrome (C-15): kiosk, full screen 1920x1080, DPR 1, de-DE, no first-run/sync/translate/
+# password/autofill/search-choice/what's-new surfaces, DevTools on container loopback only (C-17).
+set -u
+PROFILE=/profile/chrome
+W="${VC_SCREEN%x*}"; H="${VC_SCREEN#*x}"
+LANG_TAG="${VC_LANG:-de-DE}"
+mkdir -p "$PROFILE"; chmod 700 /profile "$PROFILE"
+
+# No "restore pages" bubble and no restored tab pile after a crash or container stop: mark the last exit clean and
+# drop the saved tab list (only the tab list; cookies and logins stay, C-17).
+# Spell check off (M3 saw the red squiggle under typed text): the managed policy SpellcheckEnabled=false is the rule;
+# the profile preference is set as well, so a profile created before the policy also has it off.
+python3 - "$PROFILE/Default/Preferences" <<'PY'
+import json, sys, os
+p = sys.argv[1]
+try:
+    d = json.load(open(p)) if os.path.exists(p) else {}
+    prof = d.setdefault("profile", {})
+    prof["exit_type"] = "Normal"; prof["exited_cleanly"] = True
+    d.setdefault("browser", {})["enable_spellchecking"] = False
+    d.setdefault("spellcheck", {})["use_spelling_service"] = False
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    tmp = p + ".vc-tmp"
+    json.dump(d, open(tmp, "w")); os.replace(tmp, p)
+except Exception as e:
+    print("prefs fix skipped:", e, file=sys.stderr)
+PY
+rm -rf "$PROFILE/Default/Sessions" "$PROFILE/Default/Current Session" "$PROFILE/Default/Current Tabs" \
+       "$PROFILE/Default/Last Session" "$PROFILE/Default/Last Tabs" "$PROFILE"/Singleton* 2>/dev/null
+
+# Browser settings are identical for discovery and takes: this file is the only place they are set.
+FLAGS=(
+  --user-data-dir="$PROFILE"
+  --kiosk --start-fullscreen --window-position=0,0 --window-size="$W,$H"
+  --force-device-scale-factor=1
+  --lang="$LANG_TAG" --accept-lang="$LANG_TAG"
+  --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222
+  --no-first-run --no-default-browser-check --disable-default-apps
+  --disable-search-engine-choice-screen
+  --disable-sync --password-store=basic
+  --disable-features=Translate,TranslateUI,MediaRouter,DialMediaRouteProvider,OptimizationHints,AutofillServerCommunication,PrivacySandboxSettings4,WhatsNewUI,ChromeWhatsNewUI,InterestFeedContentSuggestions,CalculateNativeWinOcclusion,GlobalMediaControls
+  --hide-crash-restore-bubble --disable-session-crashed-bubble --noerrdialogs
+  --disable-breakpad --disable-component-update --disable-background-timer-throttling
+  --disable-renderer-backgrounding --disable-backgrounding-occluded-windows
+  --autoplay-policy=no-user-gesture-required
+  --disable-spell-checking
+  about:blank
+)
+# The sandbox setting is NOT changed here: Chrome's own sandbox stays on (owner decision 2026-09-25, option a: the
+# container's syscall profile in env/compose.yaml allows the user namespaces it needs; docs/interfaces.md section 10).
+/opt/google/chrome/chrome "${FLAGS[@]}" &
+pid=$!
+trap 'kill -TERM "$pid" 2>/dev/null; wait "$pid"; exit 0' TERM INT
+# Exact 1920x1080 window at (0,0): without a window manager the kiosk window came up 1 px short (Q-80).
+python3 /opt/vc/env/lib/window_fit.py >>/tmp/vc-logs/window.log 2>&1 || echo "vc-chrome: window fit failed (see window.json)" >&2
+wait "$pid"

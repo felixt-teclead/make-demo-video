@@ -1,0 +1,5 @@
+#!/bin/sh
+# Viewer review (docs/steps/review.md): sample the delivered video into contact sheets, run the review headless, or
+# apply its semantics. Host python3, stdlib only (C-19); needs ffmpeg (VC_FFMPEG or ~/.local/bin or PATH).
+ROOT=$(cd "$(dirname -- "$0")/.." && pwd)
+PYTHONPATH="$ROOT/loop${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m vcloop.review "$@"

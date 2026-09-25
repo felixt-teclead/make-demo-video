@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>wheel-panned canvas</title>
+<style>
+  body { margin: 0; font: 16px sans-serif; background: #111; color: #eee; }
+  #clip { position: absolute; left: 100px; top: 100px; width: 800px; height: 600px; overflow: hidden; }
+  #vp { position: absolute; left: 0; top: 0; width: 800px; height: 3000px; transform: translate(0px, 0px); }
+  .card { position: absolute; left: 50px; width: 240px; height: 100px; background: #333; }
+  /* marching dashes, like the app's animated connectors (paused by pause_animations) */
+  #dash { position: absolute; left: 400px; top: 40px; width: 200px; height: 0; border-top: 2px dashed #f90;
+          animation: march 1s linear infinite; }
+  @keyframes march { from { transform: translateX(0); } to { transform: translateX(16px); } }
+</style>
+<!-- A diagram canvas like a flow-chart library: no scroll container; the wheel moves a transform (0.5 px per wheel
+     unit, clamped at the top), applied on the next frame. The page records the offset once per frame. -->
+<div id="clip"><div id="vp">
+  <div class="card" style="top: 40px">Schritt eins</div>
+  <div id="dash"></div>
+  <div class="card" style="top: 2200px">Ziel weit unten</div>
+</div></div>
+<script>
+  let y = 0, pending = 0; window.TRACE = []; window.ANIM = [];
+  document.getElementById('clip').addEventListener('wheel', e => { e.preventDefault(); pending += e.deltaY * 0.5; },
+                                                   {passive: false});
+  const tick = () => { if (pending) { y = Math.min(0, y - pending); pending = 0;
+      document.getElementById('vp').style.transform = `translate(0px, ${y}px)`; }
+    TRACE.push(y); const a = document.getAnimations()[0]; ANIM.push(a ? a.playState === 'running' : null);
+    requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+</script>

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Cut a raw take (run directory) into one clip per step, the cut record and the joined full video.
+# Usage: bin/vc-cut RUN_DIR [--out NEW_RUN_DIR] [--speed 4] [--crossfade 0.2]
+here=$(cd "$(dirname "$0")/.." && pwd)
+PYTHONPATH="$here${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m vc.cut cut "$@"

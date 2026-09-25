@@ -1,0 +1,187 @@
+{
+ "fingerprint": "sha256:5f1efec151a06b31",
+ "approval": {
+  "approved_at": "2026-09-25T06:16:25+00:00",
+  "writes": [
+   {
+    "id": "new-chat",
+    "by": "unattended, from instruction sha256:9763ab4e4daee9be",
+    "at": "2026-09-25T06:16:25+00:00"
+   }
+  ],
+  "assumptions": [
+   "start view: /de/chat may open the latest chat; the approved off-camera write new-chat ('Neues Gespräch') shows the empty start page",
+   "login: live stored session"
+  ],
+  "approver": "unattended, from instruction sha256:9763ab4e4daee9be",
+  "mode": "unattended",
+  "instruction": "sha256:9763ab4e4daee9be",
+  "fingerprint": "sha256:5f1efec151a06b31"
+ },
+ "contract": {
+  "steps": [
+   {
+    "name": "prozesse",
+    "does": "click \"Prozesse\" in the left sidebar",
+    "expect": [
+     {
+      "type": "text_visible",
+      "value": "Meine"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "suche",
+    "does": "type \"Bestell\" into the search field; one card is left",
+    "expect": [
+     {
+      "type": "element_visible",
+      "role": "link",
+      "label": "Bestellanforderung",
+      "count": 1
+     },
+     {
+      "type": "text_absent",
+      "value": "Urlaubsantrag"
+     }
+    ],
+    "write": null,
+    "typed": [
+     "Bestell"
+    ]
+   },
+   {
+    "name": "oeffnen",
+    "does": "click the card \"Bestellanforderung\"",
+    "expect": [
+     {
+      "type": "text_visible",
+      "value": "MITARBEITER"
+     },
+     {
+      "type": "text_visible",
+      "value": "EINKAUF"
+     },
+     {
+      "type": "text_visible",
+      "value": "Bestellanforderung erfassen"
+     },
+     {
+      "type": "text_visible",
+      "value": "Übergabe an Teamleitung"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "schritt-4",
+    "does": "pan down to step 4 \"Vergleichsangebote einholen\" and open it",
+    "expect": [
+     {
+      "type": "dialog_open",
+      "value": "04 Vergleichsangebote einholen"
+     },
+     {
+      "type": "text_visible",
+      "value": "SCHRITT 4 VON 5"
+     },
+     {
+      "type": "text_visible",
+      "value": "Nur bei Bedarf."
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "naechster",
+    "does": "click \"Nächster Schritt\" in the dialog",
+    "expect": [
+     {
+      "type": "dialog_open",
+      "value": "05 Bestellung in SAP anlegen"
+     },
+     {
+      "type": "text_visible",
+      "value": "SCHRITT 5 VON 5"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "schliessen",
+    "does": "close the dialog with its close button",
+    "expect": [
+     {
+      "type": "dialog_closed"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "details",
+    "does": "click the tab \"Details\"",
+    "expect": [
+     {
+      "type": "url_contains",
+      "value": "tab=details"
+     },
+     {
+      "type": "text_visible",
+      "value": "Häufigkeit"
+     },
+     {
+      "type": "text_visible",
+      "value": "etwa 60 Anforderungen im Monat"
+     },
+     {
+      "type": "text_visible",
+      "value": "Probleme & Schmerzpunkte"
+     },
+     {
+      "type": "text_visible",
+      "value": "Urlaubsabwesenheit"
+     }
+    ],
+    "write": null,
+    "typed": []
+   }
+  ],
+  "writes": [
+   {
+    "id": "new-chat",
+    "changes": "opens a new, empty chat on the start page 'Prozessaufnahme' (off camera); no chat record is created until a message is sent, and none is sent",
+    "step": "neues-gespraech"
+   }
+  ],
+  "final_hold": 12.0,
+  "length": [
+   30,
+   60
+  ],
+  "setup": {
+   "name": "neues-gespraech",
+   "does": "click \"Neues Gespräch\" in the page header (off camera) to show the empty start page \"Prozessaufnahme\"",
+   "expect": [
+    {
+     "type": "url_contains",
+     "value": "new=1"
+    },
+    {
+     "type": "text_visible",
+     "value": "Beschreibe einen Arbeitsprozess und ich helfe dir"
+    },
+    {
+     "type": "text_visible",
+     "value": "Welche Prozesse eignen sich am besten für Automatisierungen?"
+    }
+   ],
+   "write": "new-chat"
+  }
+ }
+}

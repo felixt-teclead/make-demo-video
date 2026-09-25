@@ -1,0 +1,53 @@
+/* Fixture test page (Q-91). No external resources; system font Noto Sans. */
+:root { --bg: #f4f6f9; --fg: #1d2330; --muted: #5b6475; --line: #d5dae3; --acc: #2458c6; --card: #fff; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font: 18px/1.45 "Noto Sans", sans-serif; background: var(--bg); color: var(--fg); display: flex; }
+nav { width: 240px; flex: none; background: #1f2a44; color: #fff; padding: 28px 0; }
+nav .brand { font-weight: 700; font-size: 20px; padding: 0 24px 24px; }
+nav a { display: block; color: #dbe4ff; text-decoration: none; padding: 12px 24px; font-size: 18px; }
+nav a[aria-current="page"] { background: #2e3c60; color: #fff; font-weight: 600; }
+main { flex: 1; min-width: 0; padding: 32px 48px; position: relative; overflow-y: auto; height: 100vh; }
+h1 { font-size: 30px; margin: 0 0 20px; }
+h2 { font-size: 22px; margin: 0 0 12px; }
+section.card, form.card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; max-width: 980px; }
+label { display: block; font-weight: 600; margin-bottom: 6px; }
+input[type=text] { font: inherit; padding: 8px 12px; width: 420px; border: 1px solid #aeb6c4; border-radius: 6px; }
+button { font: inherit; padding: 8px 18px; border-radius: 6px; border: 1px solid var(--acc); background: var(--acc); color: #fff; cursor: pointer; }
+button.plain { background: #fff; color: var(--acc); }
+button.link { border: 0; background: none; color: var(--acc); padding: 0; font-weight: 600; text-align: left; }
+.muted { color: var(--muted); }
+.row { display: flex; align-items: center; gap: 16px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+.row > [role=cell]:first-child { flex: 1; }
+[role=tablist] { display: flex; gap: 4px; border-bottom: 2px solid var(--line); margin: 8px 0 12px; max-width: 980px; }
+[role=tab] { background: none; color: var(--muted); border: 0; border-radius: 0; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+[role=tab][aria-selected=true] { color: var(--acc); border-bottom-color: var(--acc); font-weight: 600; }
+.status { min-height: 1.5em; margin-top: 8px; }
+code.value { font-size: 22px; background: #eef2fb; padding: 4px 10px; border-radius: 4px; }
+/* dialog + backdrop: shown and hidden in one frame unless a defect is on */
+#backdrop, #dim2 { position: fixed; inset: 0; background: rgba(10, 15, 30, .45); }
+#dlg { position: fixed; left: 50%; top: 30%; transform: translateX(-50%); width: 560px; background: #fff; border-radius: 10px; padding: 24px 28px; box-shadow: 0 10px 40px rgba(0,0,0,.3); }
+/* overlays of planted defects */
+.cover { position: fixed; inset: 0; z-index: 50; }
+.cover.white { background: #fff; } .cover.black { background: #000; }
+.skel { position: absolute; inset: 0; background: var(--bg); padding: 32px 48px; z-index: 40; }
+.skel div { background: #dde1e8; height: 26px; border-radius: 6px; margin-bottom: 22px; max-width: 900px; }
+#sprite { position: fixed; left: 1260px; top: 420px; width: 26px; height: 38px; z-index: 30; pointer-events: none; }
+#sprite[hidden] { display: none; } /* an SVG element ignores the HTML hidden attribute without this */
+.banner { background: #fff4d6; border: 1px solid #e6c46a; padding: 14px 20px; border-radius: 6px; margin-bottom: 20px; max-width: 980px; }
+/* pan view */
+#pan { position: absolute; left: 48px; right: 48px; top: 96px; bottom: 32px; overflow: auto; background: #fff; border: 1px solid var(--line); }
+#pan-inner { position: relative; width: 4200px; }
+#pan .spacer { height: 56px; background: #eef2fb; padding: 14px 20px; color: var(--muted); }
+#pan .lanes { position: sticky; top: 0; z-index: 2; display: flex; background: #26324f; color: #fff; height: 48px; }
+#pan .lanes div { width: 420px; flex: none; padding: 11px 20px; border-right: 1px solid #3c4a6e; }
+#pan svg { display: block; }
+.edge { stroke: #5b6475; stroke-width: 3; fill: none; }
+.march .edge { stroke-dasharray: 12 8; animation: march 1s linear infinite; }
+@keyframes march { to { stroke-dashoffset: -40; } }
+/* log view */
+#log { height: calc(100vh - 220px); overflow: auto; background: #fff; border: 1px solid var(--line); max-width: 980px; }
+#log div { padding: 9px 20px; border-bottom: 1px solid #eceff4; }
+/* defect settings panel (?panel=1 only; never on camera) */
+#panel { position: fixed; right: 16px; bottom: 16px; z-index: 60; background: #fff; border: 2px solid #c33; padding: 12px 16px; font-size: 15px; }
+#panel label { font-weight: 400; margin: 2px 0; }

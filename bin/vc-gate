@@ -1,0 +1,8 @@
+#!/bin/sh
+# S1 quality gate. Runs with the container's venv python (/opt/venv) or $VC_PYTHON; needs numpy + ffmpeg/ffprobe.
+here=$(cd "$(dirname "$0")/.." && pwd)
+py=${VC_PYTHON:-}
+if [ -z "$py" ]; then
+  if [ -x "$here/.venv/bin/python" ]; then py="$here/.venv/bin/python"; else py=python3; fi
+fi
+PYTHONPATH="$here/gate${PYTHONPATH:+:$PYTHONPATH}" exec "$py" -m vcgate.cli "$@"

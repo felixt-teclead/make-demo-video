@@ -1,0 +1,131 @@
+# Golden case 1 (acceptance/cases.md): "One process, four angles" (click-around, read-only).
+# Controls and routes explored live with jev on 2026-09-25 (vcloop.explore; record under explore/c1-four-angles/).
+format = "vc-spec/1"
+name = "c1-four-angles"
+title = "Ein Prozess, vier Blickwinkel"
+purpose = "Show that a documented process reads three ways (swimlanes, BPMN, RACI) and that each step and the whole process carry details, in a few clicks."
+context = "This is an intended click-through of one documented process; nothing is created, changed or shared (read-only)."
+length = [30, 60]
+deny = []
+site_switches = []
+writes = []
+
+[params]
+start_url = "https://app.example.com/de/processes"   # explored 2026-09-25
+process = "Urlaubsantrag"
+first_step = "Urlaubsantrag stellen"
+step_count = "5"
+frequency = "ca. 40 Anträge im Monat"
+
+[start]
+url = "{start_url}"
+ready = [{ type = "text_visible", value = "Meine" }, { type = "text_visible", value = "{process}" }]
+warm = ["https://app.example.com/de/processes/<process-id>"]   # the '{process}' route, loaded off camera before start.url (Q-23 skeleton after the click)
+hold = 1.2
+
+[[preconditions]]
+what = "The process list 'Meine' shows the list layout (rows), not the card layout."
+by = "human"
+check = [{ type = "element_visible", role = "link", label = "{process}" }]
+
+[[preconditions]]
+what = "'{process}' is the first row under 'Meine' and is visible without scrolling."
+by = "human"
+
+[privacy]
+account = "the owner's own account in the app (OD-05)"
+shown = "sidebar chat titles under 'Bisherige Chats', the owner's full name and organisation"
+why_ok = "the owner accepted these (OD-05, no blur in v1); colleague names stay off screen because 'Zusammenarbeit' and the 'Organisation' tab are on the profile's deny list"
+
+[[steps]]
+name = "open-process"
+does = 'click the row "Urlaubsantrag" in the process list'
+hold = 2.0
+expect = [{ type = "text_visible", value = "{first_step}" }, { type = "text_visible", value = "Swimlanes" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "{process}", role = "link" }
+  where = "the first row under 'Meine' in the process list"
+
+[[steps]]
+name = "bpmn"
+does = 'click the view button "BPMN"'
+hold = 2.5
+expect = [{ type = "text_visible", value = "BPMN exportieren" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "BPMN", role = "radio", within = "radiogroup Ansicht" }
+  where = "the view switch above the diagram"
+
+[[steps]]
+name = "raci"
+does = 'click the view button "RACI"'
+hold = 3.0
+hold_kind = "reading"
+expect = [{ type = "url_contains", value = "view=raci" }, { type = "text_visible", value = "Legende" }, { type = "text_visible", value = "{first_step}" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "RACI", role = "radio", within = "radiogroup Ansicht" }
+  where = "the view switch above the diagram"
+
+[[steps]]
+name = "swimlanes"
+does = 'click the view button "Swimlanes"'
+hold = 1.2
+expect = [{ type = "text_absent", value = "Legende" }, { type = "text_absent", value = "BPMN exportieren" }, { type = "text_visible", value = "MITARBEITER" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Swimlanes", role = "radio", within = "radiogroup Ansicht" }
+  where = "the view switch above the diagram"
+
+[[steps]]
+name = "step-dialog"
+does = 'click the step card "Urlaubsantrag stellen", read its dialog, close it with ×'
+hold = 1.0
+expect = [{ type = "dialog_closed" }, { type = "text_visible", value = "{first_step}" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label_contains = "{first_step}", role = "button", within = "application" }
+  where = "the first step card in the swimlane diagram"
+  done = [{ type = "dialog_open", value = "{first_step}" }, { type = "text_visible", value = "SCHRITT 1 VON {step_count}" }]
+  hold = 3.0
+  hold_kind = "dialog"
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Schließen", within = "dialog" }
+  where = "the close (×) button inside the open step dialog"
+  done = [{ type = "dialog_closed" }]
+
+[[steps]]
+name = "details"
+does = 'click the tab "Details"'
+hold = 3.0
+hold_kind = "reading"
+expect = [{ type = "text_visible", value = "Probleme & Schmerzpunkte" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Details", role = "link", within = "navigation" }
+  where = "the tab row of the process"
+
+[[steps]]
+name = "metadaten"
+does = 'click the tab "Metadaten"'
+hold = 12.0
+hold_kind = "final"
+expect = [{ type = "text_visible", value = "{frequency}" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Metadaten", role = "link", within = "navigation" }
+  where = "the tab row of the process"
+  done = [{ type = "text_visible", value = "Arbeitsversion" }, { type = "text_visible", value = "{frequency}" }]   # "{frequency}" also shows on Details; "Arbeitsversion" only on Metadaten (seen live)
+
+[knobs]
+
+[approval]
+approver = "unattended, from instruction sha256:8a0554717da85de6"
+approved_at = "2026-09-25T04:54:04+00:00"
+mode = "unattended"
+fingerprint = "sha256:0819563efb22ad45"
+instruction = "sha256:8a0554717da85de6"
+writes = []
+assumptions = ["login: live stored session in the recorder profile (scripted login available)", "delivery: runs/jobs/<job>/deliver"]

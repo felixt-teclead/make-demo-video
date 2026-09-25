@@ -1,0 +1,132 @@
+{
+ "fingerprint": "sha256:0819563efb22ad45",
+ "approval": {
+  "approved_at": "2026-09-25T04:54:04+00:00",
+  "writes": [],
+  "assumptions": [
+   "login: live stored session in the recorder profile (scripted login available)",
+   "delivery: runs/jobs/<job>/deliver"
+  ],
+  "approver": "unattended, from instruction sha256:8a0554717da85de6",
+  "mode": "unattended",
+  "instruction": "sha256:8a0554717da85de6",
+  "fingerprint": "sha256:0819563efb22ad45"
+ },
+ "contract": {
+  "steps": [
+   {
+    "name": "open-process",
+    "does": "click the row \"Urlaubsantrag\" in the process list",
+    "expect": [
+     {
+      "type": "text_visible",
+      "value": "Urlaubsantrag stellen"
+     },
+     {
+      "type": "text_visible",
+      "value": "Swimlanes"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "bpmn",
+    "does": "click the view button \"BPMN\"",
+    "expect": [
+     {
+      "type": "text_visible",
+      "value": "BPMN exportieren"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "raci",
+    "does": "click the view button \"RACI\"",
+    "expect": [
+     {
+      "type": "url_contains",
+      "value": "view=raci"
+     },
+     {
+      "type": "text_visible",
+      "value": "Legende"
+     },
+     {
+      "type": "text_visible",
+      "value": "Urlaubsantrag stellen"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "swimlanes",
+    "does": "click the view button \"Swimlanes\"",
+    "expect": [
+     {
+      "type": "text_absent",
+      "value": "Legende"
+     },
+     {
+      "type": "text_absent",
+      "value": "BPMN exportieren"
+     },
+     {
+      "type": "text_visible",
+      "value": "MITARBEITER"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "step-dialog",
+    "does": "click the step card \"Urlaubsantrag stellen\", read its dialog, close it with ×",
+    "expect": [
+     {
+      "type": "dialog_closed"
+     },
+     {
+      "type": "text_visible",
+      "value": "Urlaubsantrag stellen"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "details",
+    "does": "click the tab \"Details\"",
+    "expect": [
+     {
+      "type": "text_visible",
+      "value": "Probleme & Schmerzpunkte"
+     }
+    ],
+    "write": null,
+    "typed": []
+   },
+   {
+    "name": "metadaten",
+    "does": "click the tab \"Metadaten\"",
+    "expect": [
+     {
+      "type": "text_visible",
+      "value": "ca. 40 Anträge im Monat"
+     }
+    ],
+    "write": null,
+    "typed": []
+   }
+  ],
+  "writes": [],
+  "final_hold": 12.0,
+  "length": [
+   30,
+   60
+  ]
+ }
+}

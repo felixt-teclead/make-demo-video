@@ -1,0 +1,24 @@
+{
+  "name": "fixture",
+  "_comment": "The fixture test page (Q-91) at http://127.0.0.1:8099/fixture/index.html, served inside the environment. Its second-profile role proves F-36. Page docs: env/www/fixture/README.md.",
+  "hosts": [
+    "127.0.0.1:8099",
+    "localhost:8099",
+    "fixture.local"
+  ],
+  "deny_extra": [],
+  "login": {
+    "url": null,
+    "check": null,
+    "check_note": "no login: the page is local"
+  },
+  "quirk_record": "specs/quirks/fixture.local.md",
+  "data_snapshot": {
+    "what": "the page's local item store (list of ids and names)",
+    "where": "localStorage key 'vc-fixture-items' on http://127.0.0.1:8099"
+  },
+  "cleanup": {
+    "safe_delete": true,
+    "why": "every item row has its own 'Löschen' button scoped to the item's unique name; nothing leaves the page"
+  }
+}

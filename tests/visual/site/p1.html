@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>overlay test p1</title>
+<style>
+  html,body{margin:0;height:100%;background:#fbfbf8;font:16px "Noto Sans",sans-serif;color:#aaa}
+  .t{position:absolute;width:40px;height:40px;border-radius:8px;background:#dcdcd4;border:0;padding:0}
+  .t.hit{background:#ff9a3c}
+  input{position:absolute;font:20px "Noto Sans",sans-serif;color:#222;width:900px;height:36px;border:1px solid #ccc;
+        background:#fff;padding:0 8px}
+  .b{position:absolute;width:120px;height:40px;border-radius:8px;border:0;background:#c9e6c3;color:#6a6;font:14px sans-serif}
+  dialog{border:0;border-radius:12px;padding:30px;background:#fff;width:300px;height:160px}
+  dialog::backdrop{background:rgba(0,0,0,.35)}
+  a#go{position:absolute;left:1500px;top:900px;display:block;width:120px;height:40px;background:#e8d8b8;border-radius:8px}
+</style></head><body>
+<button class="t" id="t0" style="left:1362px;top:822px"></button>
+<button class="t" id="t1" style="left:1062px;top:822px"></button>
+<button class="t" id="t2" style="left:462px;top:822px"></button>
+<div style="position:absolute;left:1480px;top:80px;width:420px;height:340px;background:#0e0e10"></div>
+<button class="t" id="t4" style="left:1680px;top:230px;background:#2a2a30"></button>
+<button class="t" id="t3" style="left:1262px;top:222px"></button>
+<input id="typ" style="left:100px;top:100px" autocomplete="off">
+<input id="pst" style="left:100px;top:200px" autocomplete="off">
+<button class="b" id="slow" style="left:700px;top:400px">slow</button>
+<div id="slowout" style="position:absolute;left:700px;top:460px"></div>
+<button class="b" id="busy" style="left:900px;top:400px">busy</button>
+<button class="b" id="dlg" style="left:1100px;top:400px">dialog</button>
+<a id="go" href="#"></a>
+<dialog id="d"><button class="b" id="close" style="position:static">close</button></dialog>
+<script>
+  window.LOG = [];
+  const L = (k, e) => LOG.push({k, id: e && e.target && e.target.id, t: Date.now(), p: performance.now()});
+  document.addEventListener('mousedown', e => L('down', e), true);
+  document.addEventListener('click', e => L('click', e), true);
+  document.querySelectorAll('.t').forEach(b => b.addEventListener('click', () => b.classList.toggle('hit')));
+  document.getElementById('typ').addEventListener('input', e => L('input', e));
+  document.getElementById('pst').addEventListener('input', e => L('input', e));
+  document.getElementById('slow').addEventListener('click', () => setTimeout(() => {
+    document.getElementById('slowout').textContent = 'done'; L('slowdone'); }, 2000));
+  document.getElementById('busy').addEventListener('click', () => { const t = performance.now(); while (performance.now() - t < 1500) {} L('busydone'); });
+  document.getElementById('dlg').addEventListener('click', () => document.getElementById('d').showModal());
+  document.getElementById('close').addEventListener('click', () => document.getElementById('d').close());
+  const other = location.port === '8001' ? '8002' : '8001';
+  document.getElementById('go').href = location.protocol + '//' + (location.hostname === 'localhost' ? '127.0.0.1' : 'localhost') + ':' + other + '/p2.html';
+</script>
+</body></html>

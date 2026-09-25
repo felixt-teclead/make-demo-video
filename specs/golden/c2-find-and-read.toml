@@ -1,0 +1,146 @@
+# Golden case 2 (acceptance/cases.md): "Find a process and read a step's details" (search, pan, step paging).
+# Controls and routes explored live with jev on 2026-09-25 (vcloop.explore; record under explore/c2-find-and-read/).
+format = "vc-spec/1"
+name = "c2-find-and-read"
+title = "Wer macht was, in welchem System, wie oft, wie lange?"
+purpose = "Answer who does what, in which system, how often and how long for one process in a few clicks, without asking anyone."
+context = "This is an intended look-up of one process; off camera 'Neues Gespräch' opens an empty chat (owner-approved write, creates no chat record) and typing into the search only filters the list, nothing is saved."
+length = [30, 60]
+deny = []
+site_switches = []
+
+[params]
+start_url = "https://app.example.com/de/chat"   # explored 2026-09-25: may open the latest existing chat; the setup click empties it
+search = "Bestell"
+process = "Bestellanforderung"
+step4 = "Vergleichsangebote einholen"
+step5 = "Bestellung in SAP anlegen"
+frequency = "etwa 60 Anforderungen im Monat"   # shown as "Häufigkeit: etwa 60 …"; label and value are separate text nodes
+
+[start]
+url = "{start_url}"
+ready = [{ type = "text_visible", value = "Prozessaufnahme" }, { type = "url_contains", value = "/de/chat" }]
+warm = ["https://app.example.com/de/processes", "https://app.example.com/de/processes/<process-id>"]   # off camera: list and process routes (c1 showed a loading skeleton on a cold route)
+hold = 1.2
+  # off camera, before the cursor and the recording (docs/spec-format.md "start.setup"): the video opens on the settled
+  # empty start page. Explored 2026-09-25: the click goes to /de/chat?new=1 and adds no chat to "Bisherige Chats".
+  [start.setup]
+  name = "neues-gespraech"
+  does = 'click "Neues Gespräch" in the page header (off camera) to show the empty start page "Prozessaufnahme"'
+  write = "new-chat"
+  expect = [{ type = "url_contains", value = "new=1" }, { type = "text_visible", value = "Beschreibe einen Arbeitsprozess und ich helfe dir" }, { type = "text_visible", value = "Welche Prozesse eignen sich am besten für Automatisierungen?" }]
+    [[start.setup.actions]]
+    op = "click"
+    control = { label = "Neues Gespräch", role = "button", within = "banner" }
+    where = "the 'Neues Gespräch' button in the page header above the chat (not the one in the sidebar)"
+
+[[preconditions]]
+what = "Clicking 'Neues Gespräch' creates no chat record: the empty chat is saved only once a message is sent (explored 2026-09-25)."
+by = "human"
+
+[[writes]]
+id = "new-chat"
+step = "neues-gespraech"
+changes = "opens a new, empty chat on the start page 'Prozessaufnahme' (off camera); no chat record is created until a message is sent, and none is sent"
+labels = ["Neues Gespräch"]
+creates = false
+cleanup_note = "none: nothing is created (sidebar 'Bisherige Chats' unchanged, URL /de/chat?new=1 has no id); listed in the delivery"
+
+[privacy]
+account = "the owner's own account in the app (OD-05)"
+shown = "sidebar chat titles under 'Bisherige Chats', the owner's full name and organisation; on the Details tab only role names"
+why_ok = "the owner accepted these (OD-05, no blur in v1); 'Zusammenarbeit' and the 'Organisation' tab are on the profile's deny list"
+
+[[steps]]
+name = "prozesse"
+does = 'click "Prozesse" in the left sidebar'
+hold = 1.2
+expect = [{ type = "text_visible", value = "Meine" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Prozesse", within = "navigation" }
+  where = "the 'Prozesse' link in the left sidebar"
+
+[[steps]]
+name = "suche"
+does = 'type "Bestell" into the search field; one card is left'
+hold = 1.5
+hold_kind = "reading"
+expect = [{ type = "element_visible", role = "link", label = "{process}", count = 1 }, { type = "text_absent", value = "Urlaubsantrag" }]
+  [[steps.actions]]
+  op = "type"
+  control = { label = "Titel oder Beschreibung suchen…", role = "textbox" }
+  where = "the search field above the process cards"
+  text = "{search}"
+
+[[steps]]
+name = "oeffnen"
+does = 'click the card "Bestellanforderung"'
+hold = 2.5
+expect = [{ type = "text_visible", value = "MITARBEITER" }, { type = "text_visible", value = "EINKAUF" }, { type = "text_visible", value = "Bestellanforderung erfassen" }, { type = "text_visible", value = "Übergabe an Teamleitung" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "{process}", role = "link" }
+  where = "the only card left in the filtered process list"
+
+[[steps]]
+name = "schritt-4"
+does = 'pan down to step 4 "Vergleichsangebote einholen" and open it'
+hold = 3.0
+hold_kind = "dialog"
+expect = [{ type = "dialog_open", value = "04 {step4}" }, { type = "text_visible", value = "SCHRITT 4 VON 5" }, { type = "text_visible", value = "Nur bei Bedarf." }]
+  [[steps.actions]]
+  op = "pan"
+  to = { type = "text_visible", value = "{step4}" }
+  direction = "down"
+  seconds = 3.0
+  pause_animations = true   # the dashed connectors march; pause them during the move only (Q-31)
+  hold = 1.0
+  [[steps.actions]]
+  op = "click"
+  control = { label_contains = "{step4}", role = "button", within = "application" }
+  where = "the step 4 card in the swimlane diagram, lane EINKAUF"
+
+[[steps]]
+name = "naechster"
+does = 'click "Nächster Schritt" in the dialog'
+hold = 1.5
+hold_kind = "reading"
+expect = [{ type = "dialog_open", value = "05 {step5}" }, { type = "text_visible", value = "SCHRITT 5 VON 5" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Nächster Schritt", within = "dialog" }
+  where = "the 'Nächster Schritt' button inside the open step dialog"
+
+[[steps]]
+name = "schliessen"
+does = "close the dialog with its close button"
+hold = 1.0
+expect = [{ type = "dialog_closed" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Schließen", within = "dialog" }
+  where = "the close (×) button inside the open step dialog"
+
+[[steps]]
+name = "details"
+does = 'click the tab "Details"'
+hold = 12.0
+hold_kind = "final"
+expect = [{ type = "url_contains", value = "tab=details" }, { type = "text_visible", value = "Häufigkeit" }, { type = "text_visible", value = "{frequency}" }, { type = "text_visible", value = "Probleme & Schmerzpunkte" }, { type = "text_visible", value = "Urlaubsabwesenheit" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Details", role = "link", within = "navigation" }
+  where = "the tab row of the process"
+
+[knobs]
+writes_allowed = true   # only the approved off-camera write new-chat (C-34)
+
+[approval]
+approver = "unattended, from instruction sha256:9763ab4e4daee9be"
+approved_at = "2026-09-25T06:16:25+00:00"
+mode = "unattended"
+fingerprint = "sha256:5f1efec151a06b31"
+instruction = "sha256:9763ab4e4daee9be"
+writes = [{ id = "new-chat", by = "unattended, from instruction sha256:9763ab4e4daee9be", at = "2026-09-25T06:16:25+00:00" }]
+assumptions = ["start view: /de/chat may open the latest chat; the approved off-camera write new-chat ('Neues Gespräch') shows the empty start page", "login: live stored session"]

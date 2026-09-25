@@ -1,0 +1,133 @@
+# Golden case 3 (acceptance/cases.md): "Follow the correction loop" (never filmed; tests generalisation).
+# UNVERIFIED items come from the brief; exploration (D-10/D-11) must confirm them before approval.
+format = "vc-spec/1"
+name = "c3-correction-loop"
+title = "Der Korrekturweg einer Reisekostenabrechnung"
+purpose = "Show how a process with a decision and a loop back reads: the viewer sees the loop in the diagram and reads the decision and the correction step."
+context = "This is an intended look at one process; the search and the layout switch only change view state, nothing is saved (read-only)."
+length = [35, 60]
+deny = ["Mehr Details"]
+site_switches = []
+writes = []
+
+[params]
+start_url = "https://app.example.com/prozesse"   # UNVERIFIED route of the process list
+search = "Reise"
+process = "Reisekostenabrechnung"
+step5 = "Abrechnung zur Korrektur zurücksenden"
+decision = "Abrechnung korrekt?"
+frequency = "Häufigkeit: ca. 40 Abrechnungen pro Monat"
+
+[start]
+url = "{start_url}"
+ready = [{ type = "text_visible", value = "Meine" }]
+warm = []
+hold = 1.2
+
+[[preconditions]]
+what = "The search runs under 'Meine', so the organisation's 'TEST - Monatliche Reisekostenabrechnung' is not listed."
+by = "setup"
+check = [{ type = "text_visible", value = "Meine" }]
+
+[[preconditions]]
+what = "The process opens in its default vertical layout when opened without parameters (also after the take)."
+by = "human"
+
+[privacy]
+account = "the owner's own account in the app (OD-05)"
+shown = "sidebar chat titles, the owner's full name and organisation; 'Beteiligte Personen' shows role names only"
+why_ok = "the owner accepted these (OD-05, no blur in v1); 'Mehr Details', 'Zusammenarbeit' and the 'Organisation' tab are never offered"
+
+[[steps]]
+name = "suche"
+does = 'type "Reise" into the search field; one card is left'
+hold = 1.5
+hold_kind = "reading"
+expect = [{ type = "element_visible", label_contains = "{process}", count = 1 }]
+  [[steps.actions]]
+  op = "type"
+  control = { label = "Titel oder Beschreibung suchen…" }
+  where = "the search field above the process list"
+  text = "{search}"
+
+[[steps]]
+name = "oeffnen"
+does = 'click the card "Reisekostenabrechnung"'
+hold = 2.0
+expect = [{ type = "text_visible", value = "MITARBEITER" }, { type = "text_visible", value = "FÜHRUNGSKRAFT" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label_contains = "{process}" }
+  where = "the only card left in the filtered list"
+
+[[steps]]
+name = "horizontal"
+does = 'click the layout button "Horizontal" (left-right arrow next to the view buttons)'
+hold = 2.0
+expect = [{ type = "text_visible", value = "Übergabe an Führungskraft" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Horizontal" }
+  where = "the small left-right arrow icon next to the view buttons (its twin is 'Vertikal')"
+
+[[steps]]
+name = "pan"
+does = "pan sideways to the decision, the dashed loop back and step 5"
+hold = 2.0
+expect = [{ type = "text_visible", value = "{decision}" }, { type = "text_visible", value = "Rücksprung" }, { type = "text_visible", value = "{step5}" }]
+  [[steps.actions]]
+  op = "pan"
+  to = { type = "text_visible", value = "{step5}" }
+  direction = "right"
+  seconds = 3.0
+
+[[steps]]
+name = "schritt-5"
+does = 'click step 5 "Abrechnung zur Korrektur zurücksenden"'
+hold = 3.0
+hold_kind = "dialog"
+expect = [{ type = "dialog_open", value = "{step5}" }, { type = "text_visible", value = "SCHRITT 5 VON 8" }, { type = "text_visible", value = "Bei Fehlern geht die Abrechnung zur Korrektur zurück zum Mitarbeiter." }]
+  [[steps.actions]]
+  op = "click"
+  control = { label_contains = "zur Korrektur zurücksenden", within = "diagram" }
+  where = "the step 5 card in the FÜHRUNGSKRAFT row"
+
+[[steps]]
+name = "vorheriger"
+does = 'click "Vorheriger Schritt" in the dialog'
+hold = 2.5
+hold_kind = "reading"
+expect = [{ type = "dialog_open", value = "04 {decision}" }, { type = "text_visible", value = "SCHRITT 4 VON 8" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Vorheriger Schritt", within = "dialog" }
+  where = "the 'Vorheriger Schritt' button inside the open step dialog"
+
+[[steps]]
+name = "schliessen"
+does = "close the dialog with its close button"
+hold = 1.0
+expect = [{ type = "dialog_closed" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Schließen", within = "dialog" }   # UNVERIFIED accessible name of the × button
+  where = "the close (×) button inside the open step dialog"
+
+[[steps]]
+name = "details"
+does = 'click the tab "Details"'
+hold = 12.0
+hold_kind = "final"
+expect = [{ type = "text_visible", value = "{frequency}" }, { type = "text_visible", value = "Fehlende Belege" }, { type = "text_visible", value = "Rückfragen per E-Mail" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Details", role = "tab" }
+  where = "the tab row of the process"
+
+[knobs]
+
+[approval]
+approver = ""
+approved_at = ""
+fingerprint = ""
+writes = []

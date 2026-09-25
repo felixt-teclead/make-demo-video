@@ -1,0 +1,4 @@
+#!/bin/sh
+# Every test suite that runs without a browser, one command: bin/vc-selftest [--quick] [--only NAME...] [--list]
+here=$(cd "$(dirname "$0")/.." && pwd)
+exec python3 "$here/tests/selftest.py" "$@"

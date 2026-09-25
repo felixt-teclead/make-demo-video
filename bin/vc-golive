@@ -1,0 +1,113 @@
+#!/bin/sh
+# Go live, one command: build the environment, bring it up, check the browser, log in (scripted from the env file,
+# by path only), then film golden case 1 through the deterministic loop and gate it.
+#
+#   bin/vc-golive [--approve-as NAME] [--skip-build] [--spec SPEC] [--job ID]
+#
+# --approve-as NAME records the owner's approval of the spec (F-06) if it is not approved yet; without it an
+# unapproved spec stops here. The loop stops at the frame-check handoff (exit 10) after the gate: that is the end of
+# this command; the orchestrator continues with `bin/vc-loop resume JOB_DIR` (docs/steps/run.md).
+#
+# Exit: 0 gate PASS (handoff or done) | 1 gate FAIL or loop stop | 2 setup/approval problem | 20 human login needed |
+#       30 browser not available (Chrome exits at start, e.g. user namespaces blocked on the host; README "Go live").
+set -u
+. "$(dirname -- "$0")/vc-lib.sh"
+approve="" skip_build="" spec="specs/golden/c1-four-angles.toml" job=""
+while [ $# -gt 0 ]; do
+  case $1 in
+    --approve-as) approve=$2; shift 2 ;;
+    --skip-build) skip_build=1; shift ;;
+    --spec) spec=$2; shift 2 ;;
+    --job) job=$2; shift 2 ;;
+    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
+    *) echo "vc-golive: unknown option $1" >&2; exit 2 ;;
+  esac
+done
+cd "$VC_ROOT" || exit 2
+say() { printf '\n== %s\n' "$*"; }
+stop() { code=$1; shift; printf '\nSTOP (%s): %s\n' "$code" "$*" >&2; exit "$code"; }
+
+say "1/7 settings and preflight"
+[ -f "$VC_SETTINGS" ] || stop 2 "no settings file: run 'bin/vc-env init', set VC_ENV_FILE to your env file's path, re-run"
+bin/vc-preflight --env || stop 2 "preflight failed (see above)"
+vc_load
+
+if [ -z "$skip_build" ]; then
+  say "2/7 build the image (needs >= 5 GB free)"
+  free_kb=$(df -Pk "$(docker info --format '{{.DockerRootDir}}' 2>/dev/null || echo /)" | awk 'NR==2 {print $4}')
+  [ "${free_kb:-0}" -ge 5242880 ] || stop 2 "less than 5 GB free for the image build ($((free_kb / 1048576)) GB)"
+  bin/vc-env build || stop 2 "image build failed"
+  bin/vc-env size
+else
+  say "2/7 build skipped"
+fi
+
+say "3/7 environment up"
+if ! bin/vc-env up; then
+  h=$(curl -s --max-time 5 "http://$VC_BIND:$VC_CONTROL_PORT/health" || true)
+  echo "health: ${h:-no answer}"
+  case $h in
+    *'"chrome": false'*)
+      bin/vc-env exec sh -c 'grep -m1 -i "namespace" /tmp/vc-logs/chrome.log' 2>/dev/null
+      stop 30 "the recorder runs but Chrome exits at start: its sandbox cannot create user namespaces (check env/seccomp-chrome.json is applied and the host allows unprivileged user namespaces; README 'Go live')" ;;
+    *) stop 2 "environment did not become healthy (bin/vc-env logs)" ;;
+  esac
+fi
+
+say "4/7 browser check (C-15: one kiosk tab, 1920x1080, fonts, locale)"
+if ! bin/vc-env exec python3 -c 'import sys, urllib.request; urllib.request.urlopen("http://127.0.0.1:9222/json/version", timeout=5)' 2>/dev/null; then
+  bin/vc-env exec sh -c 'tail -n 5 /tmp/vc-logs/chrome.log' 2>/dev/null
+  stop 30 "Chrome does not answer on DevTools (see the log lines above; README 'Go live')"
+fi
+bin/vc-env check >"$VC_STATE_ABS/golive-check.json" || { cat "$VC_STATE_ABS/golive-check.json"; stop 2 "environment check failed"; }
+echo "environment check PASS ($VC_STATE_ABS/golive-check.json)"
+
+say "5/7 login (scripted from the env file when it holds credentials; else the remote view)"
+# the app profile comes from the spec's start site (F-36); the core names no app (C-40)
+login_json=$(PYTHONPATH="$VC_ROOT/loop" python3 -c 'import sys
+from vcloop import spec as S, profiles as P
+res, _ = S.resolve(S.load(sys.argv[1]), {"unique": "golive"})
+p = P.for_spec(res)[0]
+chk = (p.get("login") or {}).get("check")
+print(p["name"] + "/" + chk if chk else "")' "$spec") || stop 2 "no app profile for the spec's site (F-36)"
+if [ -z "$login_json" ]; then
+  echo "the app profile has no login"; rc=0
+else
+  bin/vc-lock login bin/vc-env exec python3 /opt/vc/env/login/scripted_login.py --profile "/opt/vc/profiles/$login_json"
+  rc=$?
+fi
+case $rc in
+  0) echo "logged in" ;;
+  20|21) bin/vc-env url
+     stop 20 "a human login is needed: open the remote view above, log in once, then re-run: bin/vc-golive --skip-build" ;;
+  *) stop 2 "login step failed (exit $rc)" ;;
+esac
+
+say "6/7 spec and approval ($spec)"
+bin/vc-spec validate "$spec" || stop 2 "the spec is not valid"
+if ! bin/vc-spec diff "$spec" >/dev/null 2>&1; then
+  [ -n "$approve" ] || stop 2 "the spec is not approved: re-run with --approve-as <your name> after reading 'bin/vc-spec view $spec'"
+  bin/vc-spec approve "$spec" --by "$approve" || stop 2 "approval failed"
+fi
+
+say "7/7 film and gate (deterministic loop: dry run, take, cut, QA)"
+job=${job:-golive-$(date +%Y%m%d-%H%M%S)}
+[ -f config/components.json ] || cp config/components.example.json config/components.json
+bin/vc-loop run "$spec" --components config/components.json --job "$job"
+rc=$?
+jd="$VC_RUNS_ABS/jobs/$job"
+bin/vc-loop status "$jd" || true
+report=$(ls -1t "$VC_RUNS_ABS"/"$job"-t*/qa/report.txt 2>/dev/null | head -n 1)
+if [ -n "$report" ]; then
+  say "gate report: $report"
+  tail -n 3 "$report"
+  if tail -n 1 "$report" | grep -q PASS; then verdict=0; else verdict=1; fi
+else
+  verdict=1
+  echo "no gate report (no take reached QA); job: $jd"
+fi
+case $rc in
+  0|10) echo "loop exit $rc (10 = handoff to the orchestrator: frame check or fixer; resume with bin/vc-loop resume $jd)"
+        exit "$verdict" ;;
+  *) stop 1 "the loop ended with exit $rc (see $jd/report.md)" ;;
+esac

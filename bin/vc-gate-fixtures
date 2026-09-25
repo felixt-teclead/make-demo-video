@@ -1,0 +1,8 @@
+#!/bin/sh
+# Q-90 fixture suite, one command. Options: --stage S1|S2|all, --only ID..., -v, --keep, --fixtures DIR
+here=$(cd "$(dirname "$0")/.." && pwd)
+py=${VC_PYTHON:-}
+if [ -z "$py" ]; then
+  if [ -x "$here/.venv/bin/python" ]; then py="$here/.venv/bin/python"; else py=python3; fi
+fi
+PYTHONPATH="$here/gate${PYTHONPATH:+:$PYTHONPATH}" exec "$py" -m vcgate.fixtures "$@"

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Fixture-Testseite – Seite 2</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Full-load navigation target. ?whiteout=1: the new document shows a white page for 400 ms first (Q-20, Q-22).
+  'use strict';
+  if (/[?&]whiteout=[1-9]/.test(location.search)) {
+    document.documentElement.style.background = '#fff';
+    const wo = document.createElement('style');
+    wo.textContent = 'body{visibility:hidden}';
+    document.head.append(wo);
+    setTimeout(() => wo.remove(), 400);
+  }
+</script>
+</head>
+<body>
+<nav aria-label="Hauptmenü">
+  <div class="brand">Fixture-Testseite</div>
+  <a href="index.html" id="back">Zur Startseite</a>
+</nav>
+<main>
+  <h1>Seite 2</h1>
+  <section class="card">
+    <h2>Zweites Dokument</h2>
+    <p>Diese Seite wird als eigenes Dokument geladen und dient für Tests mit vollständigem Seitenwechsel.</p>
+  </section>
+</main>
+<script>
+  document.getElementById('back').href = 'index.html' + location.search;
+</script>
+</body>
+</html>

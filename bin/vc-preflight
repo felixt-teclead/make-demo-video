@@ -1,0 +1,43 @@
+#!/bin/sh
+# Host preflight (C-19): container runtime + compose, POSIX shell + file lock, curl, python3. Names everything
+# missing in one message. With --env also checks the settings, the secrets file mode (C-05) and the ports.
+missing=""
+command -v docker >/dev/null 2>&1 || missing="$missing docker"
+if command -v docker >/dev/null 2>&1; then
+  docker compose version >/dev/null 2>&1 || missing="$missing docker-compose-plugin"
+  docker info >/dev/null 2>&1 || missing="$missing docker-daemon-access"
+fi
+command -v sh >/dev/null 2>&1 || missing="$missing sh"
+command -v flock >/dev/null 2>&1 || missing="$missing flock"
+command -v curl >/dev/null 2>&1 || missing="$missing curl"
+if command -v python3 >/dev/null 2>&1; then
+  python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)' 2>/dev/null || missing="$missing python3>=3.8"
+else
+  missing="$missing python3"
+fi
+if [ -n "$missing" ]; then
+  echo "preflight FAIL: missing:$missing" >&2
+  exit 1
+fi
+if [ "${1:-}" = "--env" ]; then
+  . "$(dirname -- "$0")/vc-lib.sh"
+  vc_load
+  problems=""
+  if [ ! -f "$VC_ENV_FILE_ABS" ]; then problems="$problems; env file not found (VC_ENV_FILE)"
+  else
+    mode=$(python3 -c 'import os,sys; print(oct(os.stat(sys.argv[1]).st_mode & 0o777)[2:])' "$VC_ENV_FILE_ABS")
+    [ "$mode" = 600 ] || problems="$problems; env file mode is $mode, must be 600 (C-05)"
+    case $VC_ENV_FILE_ABS in "$VC_ROOT"/*) problems="$problems; env file is inside the repository (C-05)";; esac
+  fi
+  [ "$VC_BIND" = 127.0.0.1 ] || [ "$VC_BIND" = ::1 ] || problems="$problems; VC_BIND must be loopback (C-17)"
+  running=$(docker ps -q -f "name=^${VC_CONTAINER_NAME}\$")
+  if [ -z "$running" ]; then
+    for p in "$VC_CONTROL_PORT" "$VC_VNC_PORT"; do
+      if python3 -c 'import socket,sys; s=socket.socket(); s.settimeout(0.5); sys.exit(0 if s.connect_ex((sys.argv[1], int(sys.argv[2])))==0 else 1)' "$VC_BIND" "$p"; then
+        problems="$problems; port $p is in use"
+      fi
+    done
+  fi
+  if [ -n "$problems" ]; then echo "preflight FAIL${problems}" >&2; exit 1; fi
+fi
+echo "preflight OK"

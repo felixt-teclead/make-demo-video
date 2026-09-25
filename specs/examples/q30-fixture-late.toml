@@ -1,0 +1,73 @@
+# Q-30 on the fixture test page (Q-91): a button whose answer arrives after a configurable delay.
+# late_ms = "1000" must pass the gate; set late_ms = "3000" (the page's default) and the answer lands mid-hold and
+# must fail as an unexplained hard jump. Read-only: nothing is stored or changed.
+format = "vc-spec/1"
+name = "q30-fixture-late"
+title = "Eine verzögerte Antwort abwarten"
+purpose = "Show a request whose answer arrives a moment after the click."
+context = "This is an intended demo on the local fixture page; nothing is stored or changed."
+length = [15, 40]
+preconditions = []
+deny = []
+site_switches = []
+writes = []
+
+[params]
+late_ms = "1000"                                                     # the page's answer delay (?late=, ms)
+start_url = "http://127.0.0.1:8099/fixture/index.html?late={late_ms}"   # the fixture page (Q-91)
+
+[start]
+url = "{start_url}"
+ready = [{ type = "text_visible", value = "Werkzeuge" }]
+warm = []
+hold = 1.2
+
+[privacy]
+account = "no account: a local test page"
+shown = "only synthetic status texts"
+why_ok = "nothing on the page is real data"
+
+[[steps]]
+name = "werkzeuge"
+does = 'click "Werkzeuge" in the navigation'
+hold = 1.5
+expect = [{ type = "text_visible", value = "Verzögerte Antwort" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Werkzeuge", within = "navigation" }
+  where = "the 'Werkzeuge' link in the page navigation"
+
+[[steps]]
+name = "anfordern"
+does = 'click "Antwort anfordern" and wait for the answer'
+hold = 3.0
+hold_kind = "reading"
+expect = [{ type = "text_visible", value = "Antwort erhalten" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Antwort anfordern", role = "button" }
+  where = "the 'Antwort anfordern' button in the 'Verzögerte Antwort' box"
+
+[[steps]]
+name = "details"
+does = 'click "Einträge" in the navigation and show the tab "Details"'
+hold = 12.0
+hold_kind = "final"
+expect = [{ type = "text_visible", value = "Anzahl Einträge" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Einträge", within = "navigation" }
+  where = "the 'Einträge' link in the page navigation"
+  done = [{ type = "text_visible", value = "Neuer Eintrag" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Details", role = "tab" }
+  where = "the tab row of the 'Einträge' page"
+
+[knobs]
+
+[approval]
+approver = ""
+approved_at = ""
+fingerprint = ""
+writes = []

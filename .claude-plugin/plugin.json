@@ -1,0 +1,14 @@
+{
+  "name": "vc-v1",
+  "version": "1.0.0",
+  "description": "Turns a feature into a checked demo video of a web app: aligns a use-case spec, then a deterministic loop films, cuts, runs QA and joins until a take hits or the cap is reached. A separate skill writes, validates, approves and diffs a spec without filming.",
+  "author": {
+    "name": "felixt-teclead"
+  },
+  "license": "MIT",
+  "keywords": [
+    "demo-video",
+    "screen-recording",
+    "qa"
+  ]
+}

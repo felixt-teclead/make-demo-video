@@ -1,0 +1,94 @@
+{
+ "steps": [
+  {
+   "step": "open-process",
+   "expected_visible": true,
+   "note": "Step end #15 (4.40 s) shows the swimlane view with the card 'Urlaubsantrag stellen' and the active 'Swimlanes' toggle."
+  },
+  {
+   "step": "bpmn",
+   "expected_visible": true,
+   "note": "Step end #26 (8.57 s) shows the BPMN view with the 'BPMN exportieren' button above the pool."
+  },
+  {
+   "step": "raci",
+   "expected_visible": true,
+   "note": "Step end #37 (12.67 s) shows the RACI matrix with the full 'Legende' row and the row 'Urlaubsantrag stellen'. The URL is not visible in the frame (no browser UI), so 'view=raci' cannot be checked visually. The RACI toggle is active."
+  },
+  {
+   "step": "swimlanes",
+   "expected_visible": true,
+   "note": "Step end #46 (15.20 s): the Legende and 'BPMN exportieren' are gone, and the lane header 'MITARBEITER' is visible."
+  },
+  {
+   "step": "step-dialog",
+   "expected_visible": true,
+   "note": "The dialog opens at about 17.5 s and is readable until about 21.7 s. Step end #64 (22.83 s) shows no dialog and the card 'Urlaubsantrag stellen'."
+  },
+  {
+   "step": "details",
+   "expected_visible": true,
+   "note": "Step end #75 (27.43 s) shows the Details tab with the fully readable card 'Probleme & Schmerzpunkte'."
+  },
+  {
+   "step": "metadaten",
+   "expected_visible": true,
+   "note": "Step end #95 (41.07 s) shows the Metadaten tab with Häufigkeit 'ca. 40 Anträge im Monat'."
+  }
+ ],
+ "findings": [
+  {
+   "t": 2.23,
+   "t_end": 2.6,
+   "step": "open-process",
+   "region": "process card description text around the click point on the 'Urlaubsantrag' card",
+   "box": [
+    1020,
+    120,
+    160,
+    110
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "During the cover window a dark disc around the ripple erases part of the description text ('Tea… …lender'), and a dark arc sits above the ring. It stays within about 80 px of the click point."
+  },
+  {
+   "t": 2.63,
+   "t_end": 2.63,
+   "step": "open-process",
+   "region": "swimlane canvas, Mitarbeiter and Teamleitung lanes",
+   "box": [
+    300,
+    200,
+    600,
+    860
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "At cover end the process page is half-painted: the step cards ('Urlaubsantrag stellen', 'Teamkalender prüfen', 'Urlaubsantrag genehmigen') are missing and only the connector arrows show. By the next tile (2.70 s) the page is complete, so this is a one-frame flash."
+  },
+  {
+   "t": 22.03,
+   "t_end": 22.03,
+   "step": "step-dialog",
+   "region": "thin horizontal line across the Teamleitung/Abteilungsleitung lanes at mid-height",
+   "box": [
+    870,
+    530,
+    400,
+    6
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "Right after the dialog closes, a faint stray horizontal line runs across the canvas from the 'Teamkalender prüfen' card to the right. It is gone at 22.23 s."
+  }
+ ],
+ "model": "claude-opus-5-5",
+ "tokens": {
+  "input": 96460,
+  "output": 2623
+ },
+ "seconds": 34.2,
+ "agent_cost_usd": 0.79964,
+ "runner": "claude -p (one turn)"
+}

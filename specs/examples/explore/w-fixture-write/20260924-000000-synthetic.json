@@ -1,0 +1,464 @@
+{
+ "spec": "w-fixture-write",
+ "synthetic": true,
+ "note": "FAKE exploration (browser blocked); real records come from D-10 exploration with jev",
+ "observations": [
+  {
+   "step": "eintraege",
+   "action": 0,
+   "url": "http://127.0.0.1:8099/fixture/index.html",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Einträge",
+     "own_label": "Einträge",
+     "context": [
+      "navigation x"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "anlegen",
+   "action": 0,
+   "url": "http://127.0.0.1:8099/fixture/index.html",
+   "actions": [
+    {
+     "kind": "fill",
+     "role": "searchbox",
+     "label": "Name des Eintrags",
+     "own_label": "Name des Eintrags",
+     "context": [
+      "main"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "anlegen",
+   "action": 1,
+   "url": "http://127.0.0.1:8099/fixture/index.html",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Erstellen",
+     "own_label": "Erstellen",
+     "context": [
+      "main"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "oeffnen",
+   "action": 0,
+   "url": "http://127.0.0.1:8099/fixture/index.html",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "w-fixture-write-explore",
+     "own_label": "w-fixture-write-explore",
+     "context": [
+      "row x"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "schliessen",
+   "action": 0,
+   "url": "http://127.0.0.1:8099/fixture/index.html",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Schließen",
+     "own_label": "Schließen",
+     "context": [
+      "dialog x"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "details",
+   "action": 0,
+   "url": "http://127.0.0.1:8099/fixture/index.html",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  }
+ ]
+}

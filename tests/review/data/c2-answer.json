@@ -1,0 +1,153 @@
+{
+ "steps": [
+  {
+   "step": "prozesse",
+   "expected_visible": true,
+   "note": "Step end #14 (3.87 s) shows the Prozesse list with the \"Meine 7\" tab in the header."
+  },
+  {
+   "step": "suche",
+   "expected_visible": true,
+   "note": "Step end #25 (6.97 s) shows exactly one Bestellanforderung card. Urlaubsantrag is gone."
+  },
+  {
+   "step": "oeffnen",
+   "expected_visible": true,
+   "note": "Step end #40 (10.60 s) shows the lane headers MITARBEITER and EINKAUF, the card 'Bestellanforderung erfassen' and the label 'Übergabe an Teamleitung'. All are fully readable."
+  },
+  {
+   "step": "schritt-4",
+   "expected_visible": true,
+   "note": "Step end #66 (24.80 s) shows the dialog '04 Vergleichsangebote einholen' with 'SCHRITT 4 VON 5' and 'Nur bei Bedarf.'. At pan end the step-4 card sits fully clear of the lane headers."
+  },
+  {
+   "step": "naechster",
+   "expected_visible": true,
+   "note": "Step end #74 (28.07 s) shows the dialog '05 Bestellung in SAP anlegen' with 'SCHRITT 5 VON 5'."
+  },
+  {
+   "step": "schliessen",
+   "expected_visible": true,
+   "note": "Step end #83 (30.97 s) shows no dialog; the swimlane view is visible again."
+  },
+  {
+   "step": "details",
+   "expected_visible": true,
+   "note": "Step end #103 (44.90 s) shows 'Häufigkeit: etwa 60 Anforderungen im Monat', 'Probleme & Schmerzpunkte' and 'Urlaubsabwesenheit'. The URL cannot be checked visually because no address bar is in frame; the Details tab is shown active."
+  }
+ ],
+ "findings": [
+  {
+   "t": 2.87,
+   "t_end": 5.0,
+   "step": "prozesse",
+   "region": "native title tooltip 'Prozesse' over the description line of the Bestellanforderung card, middle-left of content",
+   "box": [
+    966,
+    554,
+    76,
+    30
+   ],
+   "category": "stray_ui",
+   "severity": "blocker",
+   "what": "A white native tooltip bubble reading 'Prozesse' (left over from hovering the sidebar item) stays on screen for about 2.1 s. It covers part of the Bestellanforderung description ('…nach Genehmigung…') and carries into the suche step. It is gone by 5.30 s.",
+   "tiles": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ]
+  },
+  {
+   "t": 2.5,
+   "t_end": 2.8,
+   "step": "prozesse",
+   "region": "around the click on sidebar item 'Prozesse'",
+   "box": [
+    40,
+    180,
+    200,
+    110
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "A darker disc patch around the ripple partly dims the 'Prozessaufnahme' and 'Prozesse' highlight rows while the cover runs.",
+   "tiles": [
+    7,
+    8,
+    9
+   ]
+  },
+  {
+   "t": 7.87,
+   "t_end": 8.3,
+   "step": "oeffnen",
+   "region": "Bestellanforderung card description around the click point, top centre",
+   "box": [
+    1040,
+    95,
+    140,
+    150
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "A dark disc erases the description text ('…nach Genehmigung (ab 2.000 €…') around the click, with a black arc above the card top edge. It stays after the ripple fades (8.30 s) until the page switches. It is confined to the ripple area.",
+   "tiles": [
+    30,
+    31,
+    32,
+    33,
+    34
+   ]
+  },
+  {
+   "t": 8.37,
+   "t_end": 8.43,
+   "step": "oeffnen",
+   "region": "swimlane canvas",
+   "box": [
+    300,
+    140,
+    1600,
+    940
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "The process page appears half-painted: the connectors, gateway and labels are drawn but all step cards (1 'Bestellanforderung erfassen', 2, 3) are missing. The view is complete by 8.57 s, so this is a brief flash of about 0.1 s.",
+   "tiles": [
+    35,
+    36
+   ]
+  },
+  {
+   "t": 30.17,
+   "t_end": 30.17,
+   "step": "schliessen",
+   "region": "whole view, with a thin horizontal line where the dialog was",
+   "box": [
+    640,
+    600,
+    640,
+    8
+   ],
+   "category": "flicker_hole",
+   "severity": "minor",
+   "what": "For one frame the whole page is dark-dimmed with the dialog gone and a stray horizontal line left at the old dialog position. The frame is clean by 30.30 s.",
+   "tiles": [
+    81
+   ]
+  }
+ ],
+ "model": "claude-opus-5-5",
+ "tokens": {
+  "input": 98615,
+  "output": 3979
+ },
+ "seconds": 51.3,
+ "agent_cost_usd": 0.8643502000000001,
+ "runner": "claude -p (one turn)"
+}

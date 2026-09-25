@@ -1,0 +1,61 @@
+{
+ "_comment": "Real components in the merged plugin repo (docs/loop.md). Browser phases run under M1's vc-lock (the login check on the host; the run component takes it INSIDE the container, listed in self_locking, so the lock lives as long as the in-container runner and not as long as the host's docker exec client, C-18); everything that talks to the browser runs inside the recorder container (bin/vc-env exec). The viewer review and the fixer are handed off to the orchestrator (docs/steps/review.md and the fixer subagent, on the models set by the review_model / fixer_model knobs); `\"review\": [\"{root}/bin/vc-review\", \"headless\", \"{request}\"]` runs the review with `claude -p` instead (unattended).",
+ "lock": [
+  "{root}/bin/vc-lock",
+  "{label}"
+ ],
+ "self_locking": [
+  "run"
+ ],
+ "login_check": [
+  "{root}/bin/vc-env",
+  "exec",
+  "python3",
+  "/opt/vc/env/login/scripted_login.py",
+  "--profile",
+  "/opt/vc/profiles/example/login.json",
+  "--check-only"
+ ],
+ "run": [
+  "{root}/bin/vc-env",
+  "exec",
+  "env",
+  "VC_LOCK_TIMEOUT={lock_timeout_s}",
+  "/opt/vc/bin/vc-lock",
+  "{label}",
+  "python3",
+  "-m",
+  "vcloop.take_runner",
+  "{request_c}"
+ ],
+ "cut": [
+  "{root}/bin/vc-env",
+  "exec",
+  "python3",
+  "-m",
+  "vc.cut",
+  "cut",
+  "/runs/{run_id_c}",
+  "--speed",
+  "{speedup_factor}",
+  "--crossfade",
+  "{crossfade_s}"
+ ],
+ "gate": [
+  "{root}/bin/vc-env",
+  "exec",
+  "/opt/vc/bin/vc-gate",
+  "/runs/{run_id_c}",
+  "--events",
+  "/runs/{run_id_c}/clips/events.json"
+ ],
+ "review": "handoff",
+ "fixer": "handoff",
+ "protected": [
+  "{root}/gate/**/*.py",
+  "{root}/gate/fixtures/*.json",
+  "{root}/vc/cut/*.py",
+  "{root}/bin/vc-gate",
+  "{root}/bin/vc-cut"
+ ]
+}

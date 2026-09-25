@@ -1,0 +1,613 @@
+{
+"version": 1,
+"run_id": "c1-four-angles-20260925-064809-t1",
+"source_run": "c1-four-angles-20260925-064809-t1",
+"source_dir": "/runs/c1-four-angles-20260925-064809-t1",
+"recut": false,
+"raw": "/runs/c1-four-angles-20260925-064809-t1/raw.mp4",
+"width": 1920,
+"height": 1080,
+"fps": 30,
+"raw_frames": 1242,
+"params": {
+"speed_factor": 4.0,
+"fade_s": 0.2,
+"fade_frames": 6,
+"encoder": "libx264 high yuv420p crf18 veryfast",
+"skeleton_cover": {
+"max_s": 2.0,
+"hole_px": 72,
+"seam_max": 16.0,
+"ring_px": 4
+}
+},
+"clips": [
+{
+"index": 0,
+"step": 1,
+"name": "open-process",
+"file": "clips/01-open-process.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 4.6,
+"frames": 138,
+"source": {
+"start_t": 0.0333,
+"end_t": 4.6333,
+"start_frame": 1,
+"end_frame": 139
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 4.6,
+"src_start": 0.0333,
+"src_end": 4.6333,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [
+{
+"click_t": 2.1,
+"src_t": 2.1037,
+"label": "Urlaubsantrag",
+"x": 1096.5,
+"y": 168.25,
+"status": "covered",
+"reason": "",
+"skeleton_frames": 12,
+"seam": 7.01,
+"change_area": 0.1733,
+"hole_px": 72,
+"pre_frame": 62,
+"pre_src_frame": 63,
+"frames": [
+67,
+79
+],
+"clip_start": 2.2333,
+"clip_end": 2.6333,
+"covered_frames": 12,
+"src_frames": [
+68,
+80
+]
+}
+],
+"holds": [
+{
+"kind": "landing",
+"seconds": 1.2,
+"clip_t": 0.0,
+"clip_end": 1.2,
+"kept_seconds": 1.2,
+"src_t": 0.0103
+},
+{
+"kind": "step",
+"seconds": 2.0,
+"clip_t": 2.6,
+"clip_end": 4.6,
+"kept_seconds": 2.0,
+"src_t": 2.603
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 2.1,
+"src_t": 2.1037,
+"x": 1096.5,
+"y": 168.25,
+"label": "Urlaubsantrag",
+"navigates": false,
+"glide_clip_t": 1.6,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 7.753,
+"kept_motion_frames": 2
+},
+{
+"index": 1,
+"step": 2,
+"name": "bpmn",
+"file": "clips/02-bpmn.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 4.1667,
+"frames": 125,
+"source": {
+"start_t": 4.6333,
+"end_t": 8.9,
+"start_frame": 139,
+"end_frame": 267
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 0.0333,
+"src_start": 4.6333,
+"src_end": 4.6667,
+"factor": 1.0
+},
+{
+"clip_start": 0.0333,
+"clip_end": 4.1667,
+"src_start": 4.7667,
+"src_end": 8.9,
+"factor": 1.0
+}
+],
+"drops": [
+{
+"src_start": 4.6667,
+"src_end": 4.7667,
+"frames": 3,
+"reason": "standstill",
+"join_mad": 0.001
+}
+],
+"declined": [],
+"splices": [
+{
+"clip_t": 0.0333,
+"frame": 1,
+"src_from": 139,
+"src_to": 143,
+"removed_frames": 3,
+"reason": "standstill",
+"in_speedup": false,
+"join_mad": 0.001
+}
+],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "step",
+"seconds": 2.5,
+"clip_t": 1.6667,
+"clip_end": 4.1667,
+"kept_seconds": 2.5,
+"src_t": 6.3917
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 1.1,
+"src_t": 5.8257,
+"x": 1785.9921875,
+"y": 175.0,
+"label": "bpmn",
+"navigates": false,
+"glide_clip_t": 0.2667,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 3.667,
+"kept_motion_frames": 1
+},
+{
+"index": 2,
+"step": 3,
+"name": "raci",
+"file": "clips/03-raci.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 4.1,
+"frames": 123,
+"source": {
+"start_t": 8.9,
+"end_t": 13.0,
+"start_frame": 267,
+"end_frame": 390
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 4.1,
+"src_start": 8.9,
+"src_end": 13.0,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "reading",
+"seconds": 3.0,
+"clip_t": 1.1,
+"clip_end": 4.1,
+"kept_seconds": 3.0,
+"src_t": 9.9689
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 0.6333,
+"src_t": 9.5197,
+"x": 1863.8203125,
+"y": 175.0,
+"label": "raci",
+"navigates": false,
+"glide_clip_t": 0.3,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 7.68,
+"kept_motion_frames": 1
+},
+{
+"index": 3,
+"step": 4,
+"name": "swimlanes",
+"file": "clips/04-swimlanes.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 2.5333,
+"frames": 76,
+"source": {
+"start_t": 13.0,
+"end_t": 15.5333,
+"start_frame": 390,
+"end_frame": 466
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 2.5333,
+"src_start": 13.0,
+"src_end": 15.5333,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "step",
+"seconds": 1.2,
+"clip_t": 1.3333,
+"clip_end": 2.5333,
+"kept_seconds": 1.2,
+"src_t": 14.3172
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 0.7667,
+"src_t": 13.7537,
+"x": 1607.2265625,
+"y": 167.0,
+"label": "swimlanes",
+"navigates": false,
+"glide_clip_t": 0.3,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 7.019,
+"kept_motion_frames": 1
+},
+{
+"index": 4,
+"step": 5,
+"name": "step-dialog",
+"file": "clips/05-step-dialog.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 7.6333,
+"frames": 229,
+"source": {
+"start_t": 15.5333,
+"end_t": 23.1667,
+"start_frame": 466,
+"end_frame": 695
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 7.6333,
+"src_start": 15.5333,
+"src_end": 23.1667,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "dialog",
+"seconds": 3.0,
+"clip_t": 1.7667,
+"clip_end": 4.7667,
+"kept_seconds": 3.0,
+"src_t": 17.2828
+},
+{
+"kind": "step",
+"seconds": 1.0,
+"clip_t": 6.6333,
+"clip_end": 7.6333,
+"kept_seconds": 1.0,
+"src_t": 22.1456
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 1.1,
+"src_t": 16.6117,
+"x": 448.0,
+"y": 303.0,
+"label": "1: Urlaubsantrag stellen",
+"navigates": false,
+"glide_clip_t": 0.3667,
+"dropped": false
+},
+{
+"type": "click",
+"clip_t": 5.8333,
+"src_t": 21.3567,
+"x": 1239.0,
+"y": 399.5,
+"label": "Schließen",
+"navigates": false,
+"glide_clip_t": 5.0667,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 9.105,
+"kept_motion_frames": 5
+},
+{
+"index": 5,
+"step": 6,
+"name": "details",
+"file": "clips/06-details.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 4.6,
+"frames": 138,
+"source": {
+"start_t": 23.1667,
+"end_t": 27.7667,
+"start_frame": 695,
+"end_frame": 833
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 4.6,
+"src_start": 23.1667,
+"src_end": 27.7667,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "reading",
+"seconds": 3.0,
+"clip_t": 1.6,
+"clip_end": 4.6,
+"kept_seconds": 3.0,
+"src_t": 24.7394
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 1.0667,
+"src_t": 24.2277,
+"x": 405.296875,
+"y": 119.0,
+"label": "Details",
+"navigates": false,
+"glide_clip_t": 0.3333,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 5.622,
+"kept_motion_frames": 1
+},
+{
+"index": 6,
+"step": 7,
+"name": "metadaten",
+"file": "clips/07-metadaten.mp4",
+"site_start": "app.example.com",
+"site_end": "app.example.com",
+"duration": 13.6333,
+"frames": 409,
+"source": {
+"start_t": 27.7667,
+"end_t": 41.4,
+"start_frame": 833,
+"end_frame": 1242
+},
+"kept": [
+{
+"clip_start": 0.0,
+"clip_end": 13.6333,
+"src_start": 27.7667,
+"src_end": 41.4,
+"factor": 1.0
+}
+],
+"drops": [],
+"declined": [],
+"splices": [],
+"speedups": [],
+"badge": [],
+"freezes": [],
+"bridges": [],
+"covers": [],
+"holds": [
+{
+"kind": "final",
+"seconds": 12.0,
+"clip_t": 1.5667,
+"clip_end": 13.5667,
+"kept_seconds": 12.0,
+"src_t": 29.3272
+}
+],
+"events": [
+{
+"type": "click",
+"clip_t": 0.6667,
+"src_t": 28.4027,
+"x": 489.703125,
+"y": 119.0,
+"label": "Metadaten",
+"navigates": false,
+"glide_clip_t": 0.3333,
+"dropped": false
+}
+],
+"all_standstill": false,
+"collapsed": false,
+"raw_all_still_mad_max": 2.97,
+"kept_motion_frames": 1
+}
+],
+"joins": [
+{
+"between": [
+0,
+1
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 4.6
+},
+{
+"between": [
+1,
+2
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 8.7667
+},
+{
+"between": [
+2,
+3
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 12.8667
+},
+{
+"between": [
+3,
+4
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 15.4
+},
+{
+"between": [
+4,
+5
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 23.0333
+},
+{
+"between": [
+5,
+6
+],
+"kind": "cut",
+"sites": [
+"app.example.com",
+"app.example.com"
+],
+"full_t": 27.6333
+}
+],
+"full": "full.mp4",
+"full_duration": 41.2667,
+"full_frames": 1238,
+"full_expected_frames": 1238,
+"timing": {
+"analyze_s": 4.17,
+"plan_s": 0.32,
+"cover_s": 5.4,
+"render_s": 8.76,
+"join_s": 0.28,
+"total_s": 19.01,
+"raw_duration_s": 41.4
+}
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+# The use-case spec: validate, view, approve, fingerprint, diff (F-05..F-10). Host python3, stdlib only (C-19).
+. "$(dirname -- "$0")/vc-lib.sh"
+vc_host_dirs
+PYTHONPATH="$VC_ROOT/loop${PYTHONPATH:+:$PYTHONPATH}" exec python3 -c 'import sys; from vcloop.cli import spec_main; sys.exit(spec_main())' "$@"

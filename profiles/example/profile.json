@@ -1,0 +1,36 @@
+{
+  "name": "example",
+  "_comment": "Example app profile (F-36) for a web app at https://app.example.com. Copy this folder to profiles/<your-app>/ and replace the hosts, the deny list, the login and the quirk record with your app's. App specifics live only here and in specs (C-40).",
+  "hosts": ["app.example.com", "*.app.example.com"],
+  "deny_extra": [
+    "Bearbeiten",
+    "Prozess bearbeiten",
+    "Für die Organisation freigeben",
+    "Live mitverfolgen",
+    "Volltext anzeigen",
+    "Version einfrieren",
+    "Neuer Prozess",
+    "Auswählen",
+    "Zusammenarbeit",
+    "Organisation"
+  ],
+  "deny_notes": "Labels of controls that write or have side effects (edit, share, create, select) or that show other people's data; jev is never offered them. Replace with your app's labels. Controls that only download stay offerable.",
+  "login": {
+    "url": "https://app.example.com/",
+    "check": "login.json",
+    "check_note": "the scripted-login / login-check profile (profiles/example/login.json, env/login/scripted_login.py --check-only)"
+  },
+  "quirk_record": "specs/quirks/app.example.com.md",
+  "data_snapshot": {
+    "what": "the app's list of records with ids and their change history (C-34 read-only proof)",
+    "status": "not automated; the loop records 'not measured' in the delivery"
+  },
+  "cleanup": {"safe_delete": false, "why": "the example golden specs create nothing (c2's off-camera 'Neues Gespräch' opens an empty page without a record); no delete path is wired, so cleanup is none and it is listed in the delivery."},
+  "view_start": [
+    {"id": "sticky-lane-headers",
+     "why": "specs/quirks/app.example.com.md#sticky-lane-headers: the swimlane diagram mounts at translate(24px, 56px); its lane-header layer sits at max(translation, 0) per axis, so the headers ride along for the first 56 px (24 px sideways) of a pan, then stop. Start at (0, 0): pinned from the first frame.",
+     "url_regex": "/processes/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+     "selector": ".react-flow__viewport", "when": ".react-flow__node-swimlaneLane",
+     "by": "wheel", "x": 0, "y": 0, "wheel_px_per_unit": 0.5, "settle_ms": 1500}
+  ]
+}

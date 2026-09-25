@@ -1,0 +1,68 @@
+# Q-55 on the fixture test page (Q-91): a value copied earlier in the take appears in the field as a paste
+# (empty, then the full value at once), never typed out. Read-only for the app: nothing is stored.
+format = "vc-spec/1"
+name = "q55-fixture-paste"
+title = "Einen Wert kopieren und einfügen"
+purpose = "Show that a copied value appears in a field at once, like a paste."
+context = "This is an intended demo on the local fixture page; nothing is stored or changed."
+length = [15, 40]
+preconditions = []
+deny = []
+site_switches = []
+writes = []
+
+[params]
+start_url = "http://127.0.0.1:8099/fixture/index.html"   # the fixture page (Q-91)
+copied_value = "VC-4711-FIX"                               # the value the page shows next to "Kopieren"
+
+[start]
+url = "{start_url}"
+ready = [{ type = "text_visible", value = "Werkzeuge" }]
+warm = []
+hold = 1.2
+
+[privacy]
+account = "no account: a local test page"
+shown = "only a synthetic reference number"
+why_ok = "nothing on the page is real data"
+
+[[steps]]
+name = "werkzeuge"
+does = 'click "Werkzeuge" in the navigation'
+hold = 1.5
+expect = [{ type = "text_visible", value = "Kopieren und Einfügen" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Werkzeuge", within = "navigation" }
+  where = "the 'Werkzeuge' link in the page navigation"
+
+[[steps]]
+name = "kopieren"
+does = 'click "Kopieren" next to the reference number'
+hold = 1.5
+expect = [{ type = "text_visible", value = "In die Zwischenablage kopiert" }]
+  [[steps.actions]]
+  op = "click"
+  control = { label = "Kopieren", role = "button" }
+  where = "the 'Kopieren' button next to the reference number"
+  copies = "{copied_value}"      # this click copies the value: typing it later appears as a paste (Q-55)
+
+[[steps]]
+name = "einfuegen"
+does = 'paste the copied reference number into "Wert einfügen"'
+hold = 12.0
+hold_kind = "final"
+expect = [{ type = "text_visible", value = "Wert stimmt überein" }]
+  [[steps.actions]]
+  op = "type"
+  control = { label = "Wert einfügen" }
+  where = "the 'Wert einfügen' field below the reference number"
+  text = "{copied_value}"
+
+[knobs]
+
+[approval]
+approver = ""
+approved_at = ""
+fingerprint = ""
+writes = []

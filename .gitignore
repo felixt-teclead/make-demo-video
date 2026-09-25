@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.verify/
+.compose.env
+/out/
+/runs/
+/state/
+settings.env
+/config/components.json

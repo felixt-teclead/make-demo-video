@@ -1,0 +1,45 @@
+# vc-v1 recorder environment (C-15 to C-21). Values come from the settings file via bin/vc-env, which resolves
+# paths and passes them as VC_*_ABS. Do not run compose directly without that env file.
+name: ${VC_PROJECT}
+services:
+  recorder:
+    image: ${VC_IMAGE}
+    container_name: ${VC_CONTAINER_NAME}
+    build:
+      context: .
+      args:
+        VC_UID: ${VC_UID}
+        VC_GID: ${VC_GID}
+        VC_LOCALE: ${VC_LOCALE}
+    user: "${VC_UID}:${VC_GID}"
+    init: true
+    restart: unless-stopped
+    cpuset: "${VC_CPUSET}"
+    # Chrome's own sandbox stays ON (owner decision 2026-09-25, option a): Docker's default seccomp profile
+    # (moby docker-v29.8.1) plus an unconditional allow for clone/clone3/unshare/setns, so Chrome can create its
+    # user/PID/net namespaces as the non-root user. No capabilities added; the container stays unprivileged.
+    security_opt:
+      - seccomp=${VC_REPO_ABS}/env/seccomp-chrome.json
+    shm_size: 2gb
+    stop_grace_period: 30s
+    environment:
+      LANG: ${VC_LOCALE}
+      LC_ALL: ${VC_LOCALE}
+      TZ: ${VC_TZ}
+      VC_LANG: ${VC_LANG}
+      VC_SCREEN: ${VC_SCREEN}
+      VC_FPS: ${VC_FPS}
+      VC_CRF: ${VC_CRF}
+    ports:
+      # loopback only (C-17); the DevTools port 9222 is never published
+      - "${VC_BIND}:${VC_CONTROL_PORT}:7777"
+      - "${VC_BIND}:${VC_VNC_PORT}:6080"
+    volumes:
+      - profile:/profile
+      - ${VC_RUNS_ABS}:/runs
+      - ${VC_STATE_ABS}:/state
+      - ${VC_REPO_ABS}:/opt/vc:ro
+      - ${VC_ENV_FILE_ABS}:/run/secrets/vc.env:ro
+volumes:
+  profile:
+    name: ${VC_PROJECT}-profile

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Fixture-Testseite</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav aria-label="Hauptmenü">
+  <div class="brand">Fixture-Testseite</div>
+  <a href="#/uebersicht" data-nav="uebersicht">Übersicht</a>
+  <a href="#/eintraege" data-nav="eintraege">Einträge</a>
+  <a href="#/ansicht" data-nav="ansicht">Ansicht</a>
+  <a href="#/protokoll" data-nav="protokoll">Protokoll</a>
+  <a href="#/werkzeuge" data-nav="werkzeuge">Werkzeuge</a>
+  <a href="page2.html" id="to-page2">Seite 2</a>
+</nav>
+<main id="main">
+  <div id="banner-slot"></div>
+
+  <div data-route="uebersicht">
+    <h1>Übersicht</h1>
+    <section class="card">
+      <h2>Willkommen</h2>
+      <p>Diese lokale Seite dient als Testziel für Demo-Aufnahmen. Alle Daten bleiben im Browser.</p>
+      <p class="muted">Gespeicherte Elemente: <span id="sum-count">0</span></p>
+    </section>
+    <section class="card">
+      <h2>Bereiche</h2>
+      <p>Links finden Sie die Liste, ein großes Diagramm, ein langes Protokoll und Werkzeuge zum Kopieren.</p>
+    </section>
+  </div>
+
+  <div data-route="eintraege" hidden>
+    <h1>Einträge</h1>
+    <form class="card" id="create" aria-labelledby="create-h">
+      <h2 id="create-h">Neuer Eintrag</h2>
+      <label for="name">Name des Eintrags</label>
+      <input type="text" id="name" autocomplete="off">
+      <button type="submit">Erstellen</button>
+      <div class="status muted" id="create-status" role="status"></div>
+    </form>
+    <div role="tablist" aria-label="Ansichten der Einträge">
+      <button type="button" role="tab" id="tab-liste" aria-controls="panel-liste" aria-selected="true">Liste</button>
+      <button type="button" role="tab" id="tab-details" aria-controls="panel-details" aria-selected="false">Details</button>
+    </div>
+    <section class="card" role="tabpanel" id="panel-liste" aria-labelledby="tab-liste">
+      <div role="table" aria-label="Gespeicherte Elemente" id="items"></div>
+      <p class="muted" id="items-empty" hidden>Noch keine Elemente.</p>
+    </section>
+    <section class="card" role="tabpanel" id="panel-details" aria-labelledby="tab-details" hidden>
+      <p>Anzahl Einträge: <strong id="det-count">0</strong></p>
+      <p class="muted">Speicherort: lokaler Speicher dieses Browsers</p>
+    </section>
+  </div>
+
+  <div data-route="ansicht" hidden>
+    <h1>Ansicht</h1>
+    <div id="pan" role="region" aria-label="Diagramm">
+      <div id="pan-inner">
+        <div class="spacer" id="pan-spacer">Werkzeugleiste des Diagramms</div>
+        <div class="lanes" id="lanes"></div>
+        <svg id="graph" width="4200" height="2400" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div data-route="protokoll" hidden>
+    <h1>Protokoll</h1>
+    <p><button type="button" id="to-end">Ans Ende scrollen</button></p>
+    <div id="log" role="region" aria-label="Protokolleinträge"></div>
+  </div>
+
+  <div data-route="werkzeuge" hidden>
+    <h1>Werkzeuge</h1>
+    <section class="card" aria-labelledby="copy-h">
+      <h2 id="copy-h">Kopieren und Einfügen</h2>
+      <p>Vorgangsnummer: <code class="value" id="copy-value">VC-4711-FIX</code>
+        <button type="button" class="plain" id="copy">Kopieren</button></p>
+      <div class="status muted" id="copy-status" role="status"></div>
+      <label for="paste">Wert einfügen</label>
+      <input type="text" id="paste" autocomplete="off">
+      <div class="status" id="paste-status" role="status"></div>
+    </section>
+    <section class="card" aria-labelledby="late-h">
+      <h2 id="late-h">Verzögerte Antwort</h2>
+      <p><button type="button" id="late">Antwort anfordern</button></p>
+      <div class="status" id="late-status" role="status"></div>
+    </section>
+  </div>
+</main>
+
+<div id="backdrop" hidden></div>
+<div id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-h" hidden>
+  <h2 id="dlg-h"></h2>
+  <p id="dlg-body" class="muted"></p>
+  <button type="button" id="dlg-close">Schließen</button>
+</div>
+<div id="dim2" hidden></div>
+<svg id="sprite" viewBox="0 0 26 38" hidden aria-hidden="true"><path d="M2 2 L2 30 L9 23 L14 35 L19 33 L14 21 L24 21 Z" fill="#fff" stroke="#000" stroke-width="2" stroke-linejoin="round"/></svg>
+<script src="app.js"></script>
+</body>
+</html>

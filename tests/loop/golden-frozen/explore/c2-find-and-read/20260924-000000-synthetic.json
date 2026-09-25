@@ -1,0 +1,1312 @@
+{
+ "spec": "c2-find-and-read",
+ "synthetic": true,
+ "note": "FAKE exploration (browser blocked); real records come from D-10 exploration with jev",
+ "observations": [
+  {
+   "step": "prozesse",
+   "action": 0,
+   "url": "https://app.example.com/",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Prozesse",
+     "own_label": "Prozesse",
+     "context": [
+      "navigation x"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Bearbeiten",
+     "own_label": "Bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Prozess bearbeiten",
+     "own_label": "Prozess bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Für die Organisation freigeben",
+     "own_label": "Für die Organisation freigeben",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Live mitverfolgen",
+     "own_label": "Live mitverfolgen",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Volltext anzeigen",
+     "own_label": "Volltext anzeigen",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Version einfrieren",
+     "own_label": "Version einfrieren",
+     "context": [
+      "main"
+     ],
+     "node": 105,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Neuer Prozess",
+     "own_label": "Neuer Prozess",
+     "context": [
+      "main"
+     ],
+     "node": 106,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Auswählen",
+     "own_label": "Auswählen",
+     "context": [
+      "main"
+     ],
+     "node": 107,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Zusammenarbeit",
+     "own_label": "Zusammenarbeit",
+     "context": [
+      "main"
+     ],
+     "node": 108,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Organisation",
+     "own_label": "Organisation",
+     "context": [
+      "main"
+     ],
+     "node": 109,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 110,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 111,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 112,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 113,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 114,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "suche",
+   "action": 0,
+   "url": "https://app.example.com/",
+   "actions": [
+    {
+     "kind": "fill",
+     "role": "searchbox",
+     "label": "Titel oder Beschreibung suchen…",
+     "own_label": "Titel oder Beschreibung suchen…",
+     "context": [
+      "main"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Bearbeiten",
+     "own_label": "Bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Prozess bearbeiten",
+     "own_label": "Prozess bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Für die Organisation freigeben",
+     "own_label": "Für die Organisation freigeben",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Live mitverfolgen",
+     "own_label": "Live mitverfolgen",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Volltext anzeigen",
+     "own_label": "Volltext anzeigen",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Version einfrieren",
+     "own_label": "Version einfrieren",
+     "context": [
+      "main"
+     ],
+     "node": 105,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Neuer Prozess",
+     "own_label": "Neuer Prozess",
+     "context": [
+      "main"
+     ],
+     "node": 106,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Auswählen",
+     "own_label": "Auswählen",
+     "context": [
+      "main"
+     ],
+     "node": 107,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Zusammenarbeit",
+     "own_label": "Zusammenarbeit",
+     "context": [
+      "main"
+     ],
+     "node": 108,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Organisation",
+     "own_label": "Organisation",
+     "context": [
+      "main"
+     ],
+     "node": 109,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 110,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 111,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 112,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 113,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 114,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "oeffnen",
+   "action": 0,
+   "url": "https://app.example.com/",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Bestellanforderung",
+     "own_label": "Bestellanforderung",
+     "context": [
+      "main"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Bearbeiten",
+     "own_label": "Bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Prozess bearbeiten",
+     "own_label": "Prozess bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Für die Organisation freigeben",
+     "own_label": "Für die Organisation freigeben",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Live mitverfolgen",
+     "own_label": "Live mitverfolgen",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Volltext anzeigen",
+     "own_label": "Volltext anzeigen",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Version einfrieren",
+     "own_label": "Version einfrieren",
+     "context": [
+      "main"
+     ],
+     "node": 105,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Neuer Prozess",
+     "own_label": "Neuer Prozess",
+     "context": [
+      "main"
+     ],
+     "node": 106,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Auswählen",
+     "own_label": "Auswählen",
+     "context": [
+      "main"
+     ],
+     "node": 107,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Zusammenarbeit",
+     "own_label": "Zusammenarbeit",
+     "context": [
+      "main"
+     ],
+     "node": 108,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Organisation",
+     "own_label": "Organisation",
+     "context": [
+      "main"
+     ],
+     "node": 109,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 110,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 111,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 112,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 113,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 114,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "schritt-4",
+   "action": 1,
+   "url": "https://app.example.com/",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vergleichsangebote einholen",
+     "own_label": "Vergleichsangebote einholen",
+     "context": [
+      "diagram x"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Bearbeiten",
+     "own_label": "Bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Prozess bearbeiten",
+     "own_label": "Prozess bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Für die Organisation freigeben",
+     "own_label": "Für die Organisation freigeben",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Live mitverfolgen",
+     "own_label": "Live mitverfolgen",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Volltext anzeigen",
+     "own_label": "Volltext anzeigen",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Version einfrieren",
+     "own_label": "Version einfrieren",
+     "context": [
+      "main"
+     ],
+     "node": 105,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Neuer Prozess",
+     "own_label": "Neuer Prozess",
+     "context": [
+      "main"
+     ],
+     "node": 106,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Auswählen",
+     "own_label": "Auswählen",
+     "context": [
+      "main"
+     ],
+     "node": 107,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Zusammenarbeit",
+     "own_label": "Zusammenarbeit",
+     "context": [
+      "main"
+     ],
+     "node": 108,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Organisation",
+     "own_label": "Organisation",
+     "context": [
+      "main"
+     ],
+     "node": 109,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 110,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 111,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 112,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 113,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 114,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "naechster",
+   "action": 0,
+   "url": "https://app.example.com/",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Nächster Schritt",
+     "own_label": "Nächster Schritt",
+     "context": [
+      "dialog x"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Bearbeiten",
+     "own_label": "Bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Prozess bearbeiten",
+     "own_label": "Prozess bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Für die Organisation freigeben",
+     "own_label": "Für die Organisation freigeben",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Live mitverfolgen",
+     "own_label": "Live mitverfolgen",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Volltext anzeigen",
+     "own_label": "Volltext anzeigen",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Version einfrieren",
+     "own_label": "Version einfrieren",
+     "context": [
+      "main"
+     ],
+     "node": 105,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Neuer Prozess",
+     "own_label": "Neuer Prozess",
+     "context": [
+      "main"
+     ],
+     "node": 106,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Auswählen",
+     "own_label": "Auswählen",
+     "context": [
+      "main"
+     ],
+     "node": 107,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Zusammenarbeit",
+     "own_label": "Zusammenarbeit",
+     "context": [
+      "main"
+     ],
+     "node": 108,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Organisation",
+     "own_label": "Organisation",
+     "context": [
+      "main"
+     ],
+     "node": 109,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 110,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 111,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 112,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 113,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 114,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "schliessen",
+   "action": 0,
+   "url": "https://app.example.com/",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Schließen",
+     "own_label": "Schließen",
+     "context": [
+      "dialog x"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Bearbeiten",
+     "own_label": "Bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Prozess bearbeiten",
+     "own_label": "Prozess bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Für die Organisation freigeben",
+     "own_label": "Für die Organisation freigeben",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Live mitverfolgen",
+     "own_label": "Live mitverfolgen",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Volltext anzeigen",
+     "own_label": "Volltext anzeigen",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Version einfrieren",
+     "own_label": "Version einfrieren",
+     "context": [
+      "main"
+     ],
+     "node": 105,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Neuer Prozess",
+     "own_label": "Neuer Prozess",
+     "context": [
+      "main"
+     ],
+     "node": 106,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Auswählen",
+     "own_label": "Auswählen",
+     "context": [
+      "main"
+     ],
+     "node": 107,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Zusammenarbeit",
+     "own_label": "Zusammenarbeit",
+     "context": [
+      "main"
+     ],
+     "node": 108,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Organisation",
+     "own_label": "Organisation",
+     "context": [
+      "main"
+     ],
+     "node": 109,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 110,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 111,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 112,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 113,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 114,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  },
+  {
+   "step": "details",
+   "action": 0,
+   "url": "https://app.example.com/",
+   "actions": [
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Details",
+     "own_label": "Details",
+     "context": [
+      "main"
+     ],
+     "node": 1,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Bearbeiten",
+     "own_label": "Bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 100,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Prozess bearbeiten",
+     "own_label": "Prozess bearbeiten",
+     "context": [
+      "main"
+     ],
+     "node": 101,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Für die Organisation freigeben",
+     "own_label": "Für die Organisation freigeben",
+     "context": [
+      "main"
+     ],
+     "node": 102,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Live mitverfolgen",
+     "own_label": "Live mitverfolgen",
+     "context": [
+      "main"
+     ],
+     "node": 103,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Volltext anzeigen",
+     "own_label": "Volltext anzeigen",
+     "context": [
+      "main"
+     ],
+     "node": 104,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Version einfrieren",
+     "own_label": "Version einfrieren",
+     "context": [
+      "main"
+     ],
+     "node": 105,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Neuer Prozess",
+     "own_label": "Neuer Prozess",
+     "context": [
+      "main"
+     ],
+     "node": 106,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Auswählen",
+     "own_label": "Auswählen",
+     "context": [
+      "main"
+     ],
+     "node": 107,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Zusammenarbeit",
+     "own_label": "Zusammenarbeit",
+     "context": [
+      "main"
+     ],
+     "node": 108,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Organisation",
+     "own_label": "Organisation",
+     "context": [
+      "main"
+     ],
+     "node": 109,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Löschen",
+     "own_label": "Löschen",
+     "context": [
+      "main"
+     ],
+     "node": 110,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Export Process",
+     "own_label": "Export Process",
+     "context": [
+      "main"
+     ],
+     "node": 111,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "tab",
+     "label": "Metadaten",
+     "own_label": "Metadaten",
+     "context": [
+      "main"
+     ],
+     "node": 113,
+     "on_screen": true
+    },
+    {
+     "kind": "click",
+     "role": "button",
+     "label": "Vertikal",
+     "own_label": "Vertikal",
+     "context": [
+      "main"
+     ],
+     "node": 114,
+     "on_screen": true
+    },
+    {
+     "kind": "wait",
+     "id": "wait",
+     "label": "Wait"
+    }
+   ]
+  }
+ ]
+}

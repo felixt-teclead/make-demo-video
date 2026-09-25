@@ -1,0 +1,6 @@
+#!/bin/sh
+# The deterministic retake loop (F-11, F-14). Host python3, stdlib only (C-19). Runs and state dirs come from the one
+# settings file (settings.env, C-21) unless VC_RUNS_DIR / VC_STATE_DIR are set.
+. "$(dirname -- "$0")/vc-lib.sh"
+vc_host_dirs
+PYTHONPATH="$VC_ROOT/loop${PYTHONPATH:+:$PYTHONPATH}" exec python3 -c 'import sys; from vcloop.cli import loop_main; sys.exit(loop_main())' "$@"
