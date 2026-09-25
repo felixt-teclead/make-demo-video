@@ -39,7 +39,7 @@ HOUSE_RULES = {
 class LayoutTest(unittest.TestCase):
     def test_manifest(self):
         m = json.loads(read(".claude-plugin/plugin.json"))
-        self.assertEqual(m["name"], "vc-v1")
+        self.assertEqual(m["name"], "make-demo-video")
         self.assertTrue(m.get("version") and m.get("description"))
         self.assertTrue(SKILLS and AGENTS)
 

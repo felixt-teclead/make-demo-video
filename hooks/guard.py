@@ -16,7 +16,7 @@ stderr (Claude Code shows it to the model).
     The owner flag does not lift this. The secrets file is also blocked through any parent folder (home and /
     included), symlinks, globs, $VARS (plus what bin/vc-lib.sh exports), `cd`, and command substitutions or xargs
     pipelines that read the settings/config files.
-(c) the fixer subagent (hook input `agent_type` ending in "fixer", e.g. "vc-v1:fixer") may run only read-only
+(c) the fixer subagent (hook input `agent_type` ending in "fixer", e.g. "make-demo-video:fixer") may run only read-only
     helpers, may edit only the spec, quirk records and the step runner, and may write only its fix note.
 """
 import codecs
@@ -132,7 +132,7 @@ def is_vc_root(d):
         return True
     try:
         with open(os.path.join(d, ".claude-plugin", "plugin.json")) as f:
-            return json.load(f).get("name") == "vc-v1"
+            return json.load(f).get("name") in ("make-demo-video", "vc-v1")
     except (OSError, ValueError):
         return False
 

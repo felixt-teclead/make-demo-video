@@ -393,3 +393,22 @@ owner decision.
 - scope guess: COMMON
 - lives in: core code (review)
 - owner decision:
+
+### FX-29 Variant fixes: the fixer lists alternatives, jev ranks them, the gate picks among the filmed ones
+- date: 2026-09-25
+- case/spec: all (owner-requested behaviour of the retake loop)
+- symptom: when the fixer was unsure which fix was right it had to bet on one guess, spending a take per wrong guess
+- root cause: the fix note allowed exactly one change; the fixer's own sense of which option is best is not a
+  reliable measure (owner: no self-reported confidence, jev judges with measurements)
+- change: `loop/vcloop/variants.py` (score from the jev log only: verified/failed, first-decision hits,
+  re-decisions, retries, timeouts, jev decision confidence; decision probability logged, weight 0 because it is 1.0 in
+  all 224 logged decisions; no token logprobs exist on the provider's jev endpoint), `loop/vcloop/loop.py` phases
+  var_dry, var_rank, var_film, var_pick and stop 10, `loop/vcloop/knobs.py` (max_variants 3, variant_dry_runs 1,
+  variant_margin 0.05, variant_score_weights), `agents/fixer.md`, `docs/steps/on-fail.md`, `docs/loop.md`; commit 72f81e2
+- evidence: `tests/loop/test_variants.py` (12 tests, stub fixer and stub jev results: clear winner filmed alone,
+  close scores each filmed and the gate HIT kept whatever the listing order, take cap, dry-failed candidate never
+  filmed, contract/[approval] candidates dropped, max_variants, attended stop 10 applies nothing); vc-selftest --quick
+  9/9, vc-gate-fixtures 25/25; not yet run live
+- scope guess: COMMON
+- lives in: core code (loop)
+- owner decision: owner-requested 2026-09-25 (variants; jev scores, not the fixer)

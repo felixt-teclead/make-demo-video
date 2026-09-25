@@ -8,6 +8,9 @@ recorder (M1 run-dir layout). No browser, no network. Behaviour is scripted by a
                                        # `wait_before` (fixable) - or always (fixable: false)
    "dry_fail": {"step": "raci", "until_fix": true},   # dry runs fail at this step until it has `wait_before`
    "login_in_take": 0,                 # take number whose page asks for a login (C-31)
+   "jev": [{"step": "bpmn", "unless": "wait_before", "redecisions": 2, "confidence": 0.5, "transients": 1,
+            "timeout": true}],         # stub jev behaviour per step, when the step has (if) / lacks (unless) a
+                                       # `wait_before`; scored for variant fixes (loop/vcloop/variants.py)
    "store": "/path/items.json"}        # the fixture page's item store (writes + cleanup, C-34)
 
 Usage (as the loop's "run" component): python3 fake_runner.py REQUEST.json
@@ -33,7 +36,24 @@ def has_fix(step):
     return any(a.get("wait_before") for a in step.get("actions", []))
 
 
-def decision(log, req, step, n, action, i):
+def jev_rule(sc, step):
+    for r in sc.get("jev") or []:
+        if r.get("step") != step["name"]:
+            continue
+        if r.get("if") == "wait_before" and not has_fix(step):
+            continue
+        if r.get("unless") == "wait_before" and has_fix(step):
+            continue
+        return r
+    return {}
+
+
+def event(log, req, type_, **fields):
+    log.write(json.dumps({"ts": time.time(), "job": req["job"], "run_id": req["run_id"], "phase": req["mode"],
+                          "take": req["n"] if req["mode"] == "take" else None, "type": type_, **fields}) + "\n")
+
+
+def decision(log, req, step, n, action, i, confidence=0.95):
     seed = int(hashlib.sha256(f"{req['run_id']}:{step['name']}:{i}".encode()).hexdigest()[:6], 16)
     lat = 2200 + seed % 900                                      # deterministic "latency"
     tin = 1180 + seed % 60
@@ -44,7 +64,7 @@ def decision(log, req, step, n, action, i):
            "offered": [{"id": f"e{i}{kind[0]}", "kind": kind, "role": "button", "own_label": label, "node": i},
                        {"id": "wait", "kind": "wait"}],
            "choice": f"e{i}{kind[0]}", "operation": kind.upper(), "target": label, "probability": 0.97,
-           "confidence": 0.95, "model": "fake/jev", "latency_ms": lat, "tokens_in": tin, "tokens_out": 70,
+           "confidence": confidence, "model": "fake/jev", "latency_ms": lat, "tokens_in": tin, "tokens_out": 70,
            "cost_usd": round(tin * 4.2e-8, 9), "cost_source": "provider", "executed": True,
            "click_point": {"x": 400 + seed % 900, "y": 200 + seed % 600}}
     log.write(json.dumps(rec) + "\n")
@@ -98,13 +118,25 @@ def main(req_path):
     with open(os.path.join(rd, "take.log.jsonl"), "a") as log:
         for si, step in enumerate(spec["steps"]):
             n = 0
+            rule = jev_rule(sc, step)
+            df = sc.get("dry_fail") or {}
+            dry_fails = (req["mode"] == "dry" and df.get("step") == step["name"]
+                         and not (df.get("until_fix") and has_fix(step)))
             for i, a in enumerate(step.get("actions", [])):
                 if a["op"] in ("click", "type", "select"):
                     n += 1
-                    decision(log, req, step, n, a, si * 10 + i)
+                    key = f"{step['name']}#{n}"
+                    event(log, req, "step_start", step=key, op=a["op"], target=a.get("control"))
+                    if rule.get("timeout"):
+                        event(log, req, "readiness_wait", step=key, start=0, end=0, ok=False)
+                    for t in range(int(rule.get("transients", 0))):
+                        event(log, req, "transient", step=key, kind="stale", reason="stub", n=t + 1)
+                    k = 1 + int(rule.get("redecisions", 0))
+                    for d in range(k):
+                        decision(log, req, step, n, a, si * 10 + i + d * 100, rule.get("confidence", 0.95))
+                    event(log, req, "step_end", step=key, ok=not dry_fails, reason="check holds", decisions=k)
             ok, reason = True, None
-            df = sc.get("dry_fail") or {}
-            if req["mode"] == "dry" and df.get("step") == step["name"] and not (df.get("until_fix") and has_fix(step)):
+            if dry_fails:
                 ok, reason = False, "expected state not reached within settle_s: the view was still loading"
             if ok and step.get("write"):
                 for a in step.get("actions", []):

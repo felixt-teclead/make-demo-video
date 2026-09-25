@@ -9,7 +9,7 @@
 # this command; the orchestrator continues with `bin/vc-loop resume JOB_DIR` (docs/steps/run.md).
 #
 # Exit: 0 gate PASS (handoff or done) | 1 gate FAIL or loop stop | 2 setup/approval problem | 20 human login needed |
-#       30 browser not available (Chrome exits at start, e.g. user namespaces blocked on the host; README "Go live").
+#       30 browser not available (Chrome exits at start, e.g. user namespaces blocked on the host; README "Install").
 set -u
 . "$(dirname -- "$0")/vc-lib.sh"
 approve="" skip_build="" spec="specs/golden/c1-four-angles.toml" job=""
@@ -49,7 +49,7 @@ if ! bin/vc-env up; then
   case $h in
     *'"chrome": false'*)
       bin/vc-env exec sh -c 'grep -m1 -i "namespace" /tmp/vc-logs/chrome.log' 2>/dev/null
-      stop 30 "the recorder runs but Chrome exits at start: its sandbox cannot create user namespaces (check env/seccomp-chrome.json is applied and the host allows unprivileged user namespaces; README 'Go live')" ;;
+      stop 30 "the recorder runs but Chrome exits at start: its sandbox cannot create user namespaces (check env/seccomp-chrome.json is applied and the host allows unprivileged user namespaces; README 'Install')" ;;
     *) stop 2 "environment did not become healthy (bin/vc-env logs)" ;;
   esac
 fi
@@ -57,7 +57,7 @@ fi
 say "4/7 browser check (C-15: one kiosk tab, 1920x1080, fonts, locale)"
 if ! bin/vc-env exec python3 -c 'import sys, urllib.request; urllib.request.urlopen("http://127.0.0.1:9222/json/version", timeout=5)' 2>/dev/null; then
   bin/vc-env exec sh -c 'tail -n 5 /tmp/vc-logs/chrome.log' 2>/dev/null
-  stop 30 "Chrome does not answer on DevTools (see the log lines above; README 'Go live')"
+  stop 30 "Chrome does not answer on DevTools (see the log lines above; README 'Install')"
 fi
 bin/vc-env check >"$VC_STATE_ABS/golive-check.json" || { cat "$VC_STATE_ABS/golive-check.json"; stop 2 "environment check failed"; }
 echo "environment check PASS ($VC_STATE_ABS/golive-check.json)"

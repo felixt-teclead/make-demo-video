@@ -9,7 +9,7 @@ Goal: one approved spec file. Format and commands: `docs/spec-format.md`. Shapes
    show? v1 has no blur), read-only or which writes. For a diff or merge-request text, film the user-visible change,
    not the code.
    - Attended: ask only when really ambiguous, about 3 questions at most.
-   - Unattended (`human_reachable=no`): ask nothing. Take answers from the instruction and the README checklist
+   - Unattended (`human_reachable=no`): ask nothing. Take answers from the instruction and the checklist in `docs/unattended.md`
      defaults; note each assumption. If the app, the idea or the write decision is missing, end with a stop report.
 3. **Draft** `specs/<dir>/<name>.toml`: 3 to 7 steps, 30 to 60 s, controls described as a human sees them, an
    expected state per step, holds per the style defaults. Put account-specific values in `[params]`.

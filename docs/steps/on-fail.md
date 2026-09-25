@@ -23,6 +23,26 @@ Viewer-review blockers arrive as FIXES-LEDGER candidates: the request's `ledger.
 `<run_dir>/review/ledger-candidates.md`). Take the first candidate as the symptom, name its root cause, and fix it. Fast
 typing and the ~12 s final hold are house style: a candidate about them is no defect; answer `stop` with reason `qa`.
 
+## Several real options: variants
+
+When you see two or three real alternatives (different causes, or different levers on one cause) and cannot tell which
+one is right, return them as variants (`kind = variants`, at most `max_variants`) instead of guessing: one spec copy per
+candidate at `variant_file`, the live spec untouched. Never score or rank them. The loop then:
+
+1. drops a candidate that does not validate, changes the contract or the owner-only `[approval]` table, or is over
+   `max_variants`; one usable candidate is applied as an ordinary fix;
+2. dry-runs each candidate (`variant_dry_runs` each, counted against `dry_run_cap`, no recording) and scores it from
+   what jev did only (loop/vcloop/variants.py): steps verified vs failed, first-decision hits, re-decisions, retries,
+   timeouts, jev's decision confidence; weights in the knob `variant_score_weights`. A candidate whose dry run failed
+   is never filmed;
+3. films the top candidate, and each other one within `variant_margin` of the top score, each as its own take
+   (counted against `max_takes`; ties keep your order). Attended, it stops (stop 10) with the ranking and the plan
+   and applies nothing until the human answers `film` or `variant=ID`;
+4. keeps the best filmed one by gate, frame check and viewer review: a hit first, then fewest violations, warnings,
+   review findings, then the fewest changed lines against the approved spec, then jev score. The kept variant is the
+   live spec; the others are logged in the take log (`event: variants`), the report ("variants tried …, kept …,
+   why") and in the kept variant's FIXES-LEDGER entry ("variants that lost", with each jev score breakdown).
+
 Every accepted fix (and a flake retake) becomes one FIXES-LEDGER entry, same format as the existing FX entries. Fill
 the note's `ledger` object: `title` (short name of the fix), `root_cause`, `scope` (COMMON if every app or case would
 hit it, else SPECIFIC) and `lives_in` (spec, quirk, profile, core code (<part>)). The loop writes the entry with the

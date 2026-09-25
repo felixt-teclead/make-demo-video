@@ -25,7 +25,7 @@ equals the approved one (F-06). The viewer review can only turn a PASS into a fa
 
 ## The one knob table (F-23)
 
-`loop/vcloop/knobs.py` `TABLE`: max_takes 4, dry_runs 1, dry_run_cap 6, lock_timeout_s 600, run_timeout_s 900, flake_retakes 1,
+`loop/vcloop/knobs.py` `TABLE`: max_takes 4, dry_runs 1, dry_run_cap 6, lock_timeout_s 600, run_timeout_s 900, flake_retakes 1, max_variants 3, variant_dry_runs 1, variant_margin 0.05, variant_score_weights (variants.py),
 decisions_per_step 6, transient_retries 2, settle_s 3.0, ready_timeout_s 10.0, wait_poll_s 0.4, check_poll_s 0.05,
 point_tolerance_px 2, point_rechecks 3, the Q-62 holds (landing 1, step 1, dialog 3, reading 1.5–6 at 3.3 words/s,
 final 12), action_time_s 1.0, speedup_factor 4, crossfade_s 0.2, writes_allowed off, length 30–60,
@@ -89,8 +89,10 @@ minors go into the report; each blocker becomes a candidate in `<run_dir>/review
 phase `viewer review` records tokens, model seconds and cost. `bin/vc-review headless REQUEST` = the same with
 `claude -p` (one turn, sheets inline).
 Fixer request `<job>/fixes/request-<n>.json`: `{mode: fix|propose, spec_path, source (the failing take or dry run),
-take_log, history, flake_available, may_change, never, answer (schema), ledger {file, candidates_path, candidates},
-out}` → the fixer EDITS the spec (only the how) and writes `out` = `{kind: fix|flake|stop, hypothesis, change {what,
+take_log, history, variants_tried, max_variants, variant_file, flake_available, may_change, never, answer (schema),
+ledger {file, candidates_path, candidates}, out}` → the fixer EDITS the spec (only the how), or writes 2-3 unscored
+candidate copies (`variant_file`), and writes `out` = `{kind: fix|variants|flake|stop, hypothesis, variants [{id,
+hypothesis, change, ledger, spec_file}], change {what,
 where, old, new, why}, stop {reason: login|write|mitigation|qa|app_bug|recorder_down|substance, detail}, next,
 ledger {title, root_cause, scope, lives_in}, model, agent_cost_usd?}`. Each accepted fix or flake retake is appended
 to FIXES-LEDGER.md (`VC_LEDGER` / components `"ledger"` override the path) under "Loop fixes" with the next FX id;
@@ -98,6 +100,12 @@ the symptom comes from the review's ledger candidates (else the gate), and the n
 (take log `ledger_entries`). The loop, not the
 fixer, starts every retake. It refuses (reverts, then stops) a fix that changes the contract (stop 1), makes the spec
 invalid or changes a protected file (stop 7), a second flake (stop 7), or a note without an edit (stop 7).
+Variants (docs/steps/on-fail.md): phases `var_dry` (one scoring dry run per candidate, `variant_dry_runs`, counted
+against `dry_run_cap`; timing phase `dry run (variant)`) → `var_rank` (jev score, loop/vcloop/variants.py; attended:
+stop 10) → `var_film` → take … judge (take-log row `variant`) for each candidate within `variant_margin` of the top,
+within `max_takes` → `var_pick` (gate, frame check, viewer review, closeness to the approved spec) → the kept variant
+is the live spec and gets the ledger entry with the losing variants' scores; take-log row `{event: variants}` and
+report section "variant fixes".
 
 ## Stop points (F-22) and answers
 
@@ -112,6 +120,7 @@ invalid or changes a protected file (stop 7), a second flake (stop 7), or a note
 | 7 fixer out of scope, precondition, recorder down, budget | `continue` | ends |
 | 8 promotion (F-35) | – | S2: listed as none |
 | 9 cleanup without a safe path | – | items left and listed |
+| 10 variant fixes, ranked by jev | `film` (the plan), `variant=ID` (film only that one) | films the plan, no question |
 
 Any stop can be answered `abort`. An ended unattended job can be resumed attended: `resume --attended --answer …`.
 

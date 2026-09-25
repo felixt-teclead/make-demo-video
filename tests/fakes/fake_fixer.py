@@ -5,6 +5,8 @@ its first click (`wait_before`, a "how" change F-15 allows). If that step alread
 hold by 0.5 s (also a "how" change) - which does not remove an unfixable defect.
 propose mode: writes only the next hypothesis. Scenario {"fixer": "rogue"} deletes an expected state instead (a
 contract change the loop must refuse); {"fixer": "flake"} asks for one unchanged retake; {"fixer": "stop-login"}.
+{"fixer": "variants" | "variants-hold-first" | "variants-rogue" | "variants-many"}: the first fix returns candidate
+spec copies (VARIANT_SETS) instead of one edit; later fixes are normal.
 """
 import json
 import os
@@ -34,7 +36,68 @@ def step_span(name):
     return start, end
 
 
+def v_wait(ls):
+    s, e = step_span_in(ls, step)
+    act = next(i for i in range(s, e) if ls[i].strip().startswith(('op = "click"', 'op = "type"')))
+    ls.insert(act + 1, '  wait_before = [{ type = "dialog_closed" }]')
+    return {"what": "wait_before", "where": f"step {step}, first action", "old": "none",
+            "new": "wait for readiness (no open dialog)", "why": "black frames while the view loads"}
+
+
+def v_hold(ls):
+    s, e = step_span_in(ls, step)
+    hi = next(i for i in range(s, e) if ls[i].startswith("hold = "))
+    old = float(ls[hi].split("=")[1])
+    ls[hi] = f"hold = {old + 0.5}"
+    return {"what": "hold", "where": f"step {step}", "old": old, "new": old + 0.5, "why": "view settles late"}
+
+
+def v_both(ls):
+    ch = v_wait(ls)
+    v_hold(ls)
+    return dict(ch, what="wait_before + hold", new="readiness wait and +0.5 s hold")
+
+
+def v_rogue(ls):
+    s, e = step_span_in(ls, step)
+    i = next(i for i in range(s, e) if ls[i].startswith("expect = ["))
+    old = ls[i]
+    ls[i] = re.sub(r"\{[^{}]*\}(, )?", "", old, count=1).replace("[, ", "[")
+    return {"what": "expect", "where": step, "old": old, "new": ls[i], "why": "drop a check"}
+
+
+def v_approval(ls):
+    i = next(i for i, l in enumerate(ls) if l.startswith("approver = "))
+    old = ls[i]
+    ls[i] = 'approver = "fixer"'
+    return {"what": "approver", "where": "[approval]", "old": old, "new": ls[i], "why": "owner-only field"}
+
+
+def step_span_in(ls, name):
+    start = next(i for i, l in enumerate(ls) if l.strip() == f'name = "{name}"')
+    end = next((i for i in range(start + 1, len(ls)) if ls[i].startswith("[[steps]]") or ls[i].startswith("[knobs]")), len(ls))
+    return start, end
+
+
+VARIANT_SETS = {"variants": [v_wait, v_hold], "variants-hold-first": [v_hold, v_wait],
+                "variants-rogue": [v_wait, v_rogue, v_approval], "variants-many": [v_wait, v_hold, v_both, v_hold]}
 mode = sc.get("fixer", "normal")
+if mode in VARIANT_SETS and req["mode"] == "fix" and not req.get("variants_tried"):
+    # lists candidates only; never scores or ranks them, never edits the live spec
+    out.update(kind="variants", hypothesis=f"step {step}: the view is not ready when filmed; the lever is unclear",
+               variants=[])
+    for k, fn in enumerate(VARIANT_SETS[mode], 1):
+        ls = list(lines)
+        ch = fn(ls)
+        f = req["variant_file"].replace("{k}", str(k))
+        open(f, "w", encoding="utf-8").write("\n".join(ls))
+        out["variants"].append({"id": chr(64 + k), "hypothesis": f"step {step}: {ch['why']}", "change": ch,
+                                "ledger": {"title": f"{step}: {ch['what']}", "root_cause": ch["why"],
+                                           "scope": "SPECIFIC", "lives_in": "spec"}, "spec_file": f})
+    json.dump(out, open(req["out"], "w"), indent=1)
+    sys.exit(0)
+if mode in VARIANT_SETS:
+    mode = "normal"
 if req["mode"] == "propose":
     out.update(kind="fix", hypothesis=f"step {step}: try a longer readiness wait", next=f"step {step}: add an off-camera warm-up of its route")
 elif mode == "flake":                      # asks for an unchanged retake every time (the loop allows one)

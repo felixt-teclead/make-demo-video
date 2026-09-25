@@ -108,7 +108,7 @@ class GuardTest(unittest.TestCase):
         self.blocked("Write", {"file_path": os.path.join(ROOT, "specs/golden/new.toml"),
                                "content": "name='x'\n[approval]\napprover='me'\n"})
         self.blocked("Bash", {"command": "vc-spec approve specs/golden/c2-find-and-read.toml --by me"},
-                     agent="vc-v1:fixer")
+                     agent="make-demo-video:fixer")
 
     def test_approval_table_lines_protected(self):
         with open(SPEC) as f:
@@ -313,13 +313,13 @@ class GuardTest(unittest.TestCase):
                     "bin/vc-env exec python3 -m vcloop.take_runner req.json", "bin/vc-gate runs/x",
                     "bin/vc-cut runs/x", "python3 -m vc.cut cut runs/x", "bin/vc-spec validate x.toml && docker ps",
                     "bash -c 'bin/vc-loop resume x'"):
-            err = self.blocked("Bash", {"command": cmd}, agent="vc-v1:fixer")
+            err = self.blocked("Bash", {"command": cmd}, agent="make-demo-video:fixer")
             self.assertIn("loop script starts every retake", err)
 
     def test_fixer_read_only_helpers_allowed(self):
         for cmd in ("bin/vc-spec validate " + SPEC, "bin/vc-spec diff " + SPEC, "bin/vc-spec view " + SPEC,
                     "bin/vc-spec contract " + SPEC, "bin/vc-loop status runs/jobs/x", "grep -n hold " + SPEC):
-            self.allowed("Bash", {"command": cmd}, agent="vc-v1:fixer")
+            self.allowed("Bash", {"command": cmd}, agent="make-demo-video:fixer")
 
     def test_fixer_edits_spec_how_allowed(self):
         with open(SPEC) as f:
@@ -328,18 +328,18 @@ class GuardTest(unittest.TestCase):
         self.assertGreater(i, 0)
         line = text[i:text.index("\n", i)]
         self.allowed("Edit", {"file_path": SPEC, "old_string": line, "new_string": line[:-1] + ' (left)"'},
-                     agent="vc-v1:fixer")
+                     agent="make-demo-video:fixer")
         self.allowed("Write", {"file_path": os.path.join(ROOT, "runs/jobs/j1/fixes/fix-1.json"), "content": "{}"},
-                     agent="vc-v1:fixer")
+                     agent="make-demo-video:fixer")
 
     def test_fixer_edit_scope(self):
         self.blocked("Edit", {"file_path": "gate/vcgate/checks/motion.py", "old_string": "a", "new_string": "b"},
-                     agent="vc-v1:fixer", owner=True)
+                     agent="make-demo-video:fixer", owner=True)
         self.blocked("Edit", {"file_path": "loop/vcloop/loop.py", "old_string": "a", "new_string": "b"},
-                     agent="vc-v1:fixer")
-        self.blocked("Write", {"file_path": SPEC, "content": "x"}, agent="vc-v1:fixer")
+                     agent="make-demo-video:fixer")
+        self.blocked("Write", {"file_path": SPEC, "content": "x"}, agent="make-demo-video:fixer")
         self.allowed("Edit", {"file_path": "specs/quirks/fixture.local.md", "old_string": "a", "new_string": "b"},
-                     agent="vc-v1:fixer")
+                     agent="make-demo-video:fixer")
 
 
 if __name__ == "__main__":

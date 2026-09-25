@@ -25,6 +25,7 @@ from . import logs as L
 from . import profiles as P
 from . import review as RV
 from . import spec as S
+from . import variants as VW
 
 EXIT = {"done": 0, "handoff": 10, "waiting": 20, "ended": 21, "refused": 2}
 
@@ -38,6 +39,7 @@ STOP_POINTS = {
     7: ("a fixer stop outside its scope (QA definition, app bug, recorder down, precondition)", ["continue", "abort"]),
     8: ("a proposal to promote a fix (F-35)", ["accept", "reject"]),
     9: ("cleanup without a clear, safe delete path", ["leave"]),
+    10: ("the fixer returned variant fixes, ranked by their jev dry runs", ["film", "variant=ID", "abort"]),
 }
 FIX_STOP_REASONS = {"login": 2, "write": 4, "mitigation": 5, "qa": 7, "app_bug": 7, "recorder_down": 7, "substance": 1}
 
@@ -103,7 +105,7 @@ class Job:
               "need_dry": True, "dry_ok_hash": None, "flakes_used": 0, "pending_changes": [], "last_verdict": None,
               "stop": None, "stops": [], "fix_count": 0, "fix_source": None, "created_items": [],
               "in_progress": None, "phase_seq": [], "hit_take": None, "delivery": None, "cleanup": None,
-              "answers": [], "current": None, "instruction": instruction_path}
+              "answers": [], "current": None, "instruction": instruction_path, "var": None, "var_history": []}
         with open(os.path.join(jdir, "state.json"), "w") as f:
             json.dump(st, f, indent=1)
         return cls(jdir)
@@ -182,7 +184,7 @@ class Job:
     # ------------------------------------------------------------------------------------------------- stops
     def stop(self, point, needed, *, resume_next=None, extra=None):
         name, options = STOP_POINTS[point]
-        best, hit = L.best_take(L.read_jsonl(self.take_log), self._length())
+        best, hit = self._best(L.read_jsonl(self.take_log))
         s = {"point": point, "name": name, "needed": needed, "options": options, "at": _now_iso(),
              "phase": self.st["phase_seq"][-1] if self.st["phase_seq"] else None,
              "resume_next": resume_next or self.st["next"], "mode": "attended" if self.attended else "unattended",
@@ -209,6 +211,7 @@ class Job:
 
     def _stop_text(self, s, question):
         lines = [f"STOP {s['point']} ({s['name']})", f"needed: {s['needed']}", "options: " + " | ".join(s["options"])]
+        lines += [f"  {x}" for x in s.get("variants") or []]
         if s.get("best_take"):
             lines.append(f"best take so far: take {s['best_take']} ({'HIT' if s['best_is_hit'] else 'NOT A HIT'})")
         lines.append(f"loop state: {os.path.join(self.dir, 'state.json')} (takes {self.st['takes_used']} of "
@@ -252,6 +255,15 @@ class Job:
         elif p in (1, 4):
             nxt = "preflight"
             self.st["need_dry"] = True
+        elif p == 10:
+            v = self.st["var"]
+            if opt == "variant":
+                c = next((c for c in v["cands"] if c.get("dry_ok") and val in (c["id"], str(c["k"]))), None)
+                if not c:
+                    raise Refused(f"no variant {val!r} with a green dry run; choose from "
+                                  + ", ".join(c["id"] for c in VW.rank(v["cands"])))
+                v["filmed"] = [c["k"]]
+            nxt = "var_film"
         self.st["next"] = nxt
         self.st["status"] = "running"
         self.st["stop"] = None
@@ -649,6 +661,11 @@ class Job:
                "ledger_candidates": fc.get("ledger_candidates"),
                "contract_ok": contract_ok, "length": length, "hit": bool(hit), "decision": decision,
                "qa_report": qa.get("report"), "run_dir": cur["run_dir"]}
+        var = self.st.get("var") or {}
+        if var.get("filming"):
+            c = self._var_cand(var["filming"])
+            row["variant"] = {"fix": var["n"], "id": c["id"], "score": c["score"], "jev": VW.breakdown(c)}
+            row["decision"] = f"variant {c['id']}: filmed; the loop compares the filmed variants"
         self._ledger_evidence(row)
         L.append_jsonl(self.take_log, row)
         self.st["last_verdict"] = {"take": cur["take"], "verdict": qa.get("verdict"), "hit": bool(hit)}
@@ -659,7 +676,9 @@ class Job:
                                      "ledger_candidates": row["ledger_candidates"],
                                      "reason": res.get("reason"), "failed_step": res.get("failed_step"),
                                      "contract_ok": contract_ok}
-        if hit:
+        if var.get("filming"):
+            self.st["next"] = self._var_judged(row, fc)
+        elif hit:
             self.st["hit_take"] = cur["take"]
             self.st["next"] = "deliver"
         elif self.st["takes_used"] < self.kv["max_takes"]:
@@ -701,13 +720,20 @@ class Job:
         shutil.copyfile(self.st["spec_path"], backup)
         req = {"mode": mode, "n": n, "model": self.kv["fixer_model"], "spec_path": self.st["spec_path"],
                "source": self.st.get("fix_source"), "take_log": self.take_log,
-               "history": [r.get("change") for r in L.read_jsonl(self.take_log)],
+               "history": [r.get("change") for r in L.read_jsonl(self.take_log) if "take" in r],
+               "variants_tried": [h.get("lines") for h in self.st.get("var_history") or []],
+               "max_variants": self.kv["max_variants"],
+               "variant_file": os.path.join(fdir, f"fix-{n}-variant-{{k}}.toml"),
                "flake_available": self.st["flakes_used"] < self.kv["flake_retakes"],
                "may_change": "the how: control descriptions, done conditions, waits, holds (not the final hold), "
                              "off-camera warm-ups, camera speed, masking, plain runner bugs (F-15)",
                "never": "QA checks/thresholds, cutter quality rules, contract parts: steps, expected states, "
                         "writes, final hold, length range (F-06/F-15)",
-               "answer": {"kind": "fix | flake | stop", "hypothesis": "step X fails because Y; changing Z fixes it",
+               "answer": {"kind": "fix | variants | flake | stop",
+                          "hypothesis": "step X fails because Y; changing Z fixes it",
+                          "variants": [{"id": "A", "hypothesis": "", "change": {"what": "", "where": "", "old": "",
+                                                                             "new": "", "why": ""},
+                                        "ledger": {}, "spec_file": "variant_file with {k} = 1, 2, 3"}],
                           "change": {"what": "", "where": "", "old": "", "new": "", "why": ""},
                           "stop": {"reason": "login | write | mitigation | qa | app_bug | recorder_down | substance",
                                    "detail": ""}, "next": "(propose mode) the fix it would try next",
@@ -754,18 +780,18 @@ class Job:
         return (f"{src.get('kind', 'run')} {src.get('run_id', '')}: {src.get('reason') or ''} "
                 f"{('step ' + src['failed_step']) if src.get('failed_step') else ''}").strip()
 
-    def _ledger_add(self, fx, change_note, changed_files, kind):
+    def _ledger_add(self, fx, change_note, changed_files, kind, symptom=None, led=None):
         """One FIXES-LEDGER entry per accepted fix or flake retake; the evidence is filled in after the retake."""
         lg = fx.get("ledger") or {}
         ch = fx.get("change") or {}
-        led = self._ledger_request()
+        led = led or self._ledger_request()
         title = lg.get("title") or (f"{self.spec().get('name')}: flake retake, no change" if kind == "flake" else
                                     f"{self.spec().get('name')}: {ch.get('what')} @ {ch.get('where')}")
         files = ", ".join(f"`{os.path.relpath(f, P.ROOT) if f.startswith(P.ROOT + os.sep) else f}`"
                           for f in changed_files)
         cand = f"; review candidates {led['candidates_path']}" if led["candidates"] else ""
         fields = {"date": _now_iso()[:10], "case/spec": f"{self.spec().get('name')} (job {os.path.basename(self.dir)})",
-                  "symptom": self._symptom(),
+                  "symptom": symptom or self._symptom(),
                   "root cause": lg.get("root_cause") or fx.get("hypothesis") or "(fixer gave none)",
                   "change": (change_note + (f"; files {files}" if files else "") + "; uncommitted (loop edit)"),
                   "evidence": f"pending: the next take's gate and viewer review{cand}",
@@ -826,6 +852,14 @@ class Job:
                 result = "refused: protected files changed"
                 self.stop(7, f"the fixer changed protected files (QA definition / cutter rules): {bad}; "
                              "patch the spec, not the judge (F-19)", resume_next="fix")
+            if kind == "variants":
+                single = self._variants_in(fx, ctx, changed_code)
+                if single is None:
+                    result = f"variants: {len(self.st['var']['cands'])} candidates, scored by jev dry runs"
+                    return
+                fx, kind = single, "fix"
+                changed_text = _sha_file(self.st["spec_path"]) != _sha_file(ctx["backup"])
+                fp_after = S.fingerprint(self.spec())
             if kind == "stop":
                 reason = (fx.get("stop") or {}).get("reason", "qa")
                 self._revert(ctx)
@@ -897,11 +931,259 @@ class Job:
                            agent_cost_usd=fx.get("agent_cost_usd"))
         self.st["next"] = "deliver"
 
+
+    # ------------------------------------------------------------------------------------------ variant fixes
+    # The fixer only lists candidates; jev dry runs rank them (variants.py); gate, frame check and viewer review
+    # pick among the filmed ones. The live spec always holds the base between phases, except while a variant is
+    # being filmed or after it was kept.
+    def _write_spec(self, text):
+        with open(self.st["spec_path"], "w", encoding="utf-8") as f:
+            f.write(text)
+
+    def _var_text(self, c):
+        with open(c["file"], encoding="utf-8") as f:
+            return f.read()
+
+    def _check_variant(self, text, ctx, base_ap):
+        """Why a candidate cannot be used, or None. Same limits as a single fix, plus the owner-only [approval]."""
+        self._write_spec(text)
+        try:
+            sp = self.spec()
+            errs = S.errors(S.validate(sp))
+            if errs:
+                return "spec invalid: " + "; ".join(map(str, errs[:2]))
+            if S.fingerprint(sp) != ctx["fp_before"]:
+                return "changes the contract (what the video shows)"
+            if sp.get("approval") != base_ap:
+                return "changes the owner-only [approval] table"
+            return None
+        except Exception as e:
+            return f"unreadable: {type(e).__name__}: {e}"
+        finally:
+            self._revert(ctx)
+
+    def _variants_in(self, fx, ctx, changed_code):
+        """Take the fixer's candidate specs. Returns a single-fix note when only one is usable (applied to the live
+        spec), else None with the variant round set up."""
+        if changed_code:
+            self._revert(ctx)
+            self.stop(7, "variant fixes must be spec copies; the fixer changed code: "
+                         + ", ".join(os.path.relpath(f, P.ROOT) for f in changed_code), resume_next="fix")
+        self._revert(ctx)
+        base_text = open(ctx["backup"], encoding="utf-8").read()
+        base_ap = self.spec().get("approval")
+        fdir = os.path.dirname(ctx["out"])
+        cands = []
+        for k, v in enumerate(fx.get("variants") or [], 1):
+            c = {"k": k, "id": str(v.get("id") or chr(64 + k)), "hypothesis": v.get("hypothesis"),
+                 "change": v.get("change") or {}, "ledger": v.get("ledger") or {}, "runs": [], "status": "pending",
+                 "file": os.path.join(fdir, f"fix-{ctx['n']}-variant-{k}.toml")}
+            src = v.get("spec_file")
+            if k > self.kv["max_variants"]:
+                c["dropped"] = f"over max_variants={self.kv['max_variants']}"
+            elif not src or not os.path.isfile(src):
+                c["dropped"] = f"no spec file ({src})"
+            else:
+                text = open(src, encoding="utf-8").read()
+                if os.path.abspath(src) != c["file"]:
+                    shutil.copyfile(src, c["file"])
+                c["dropped"] = "no edit" if text == base_text else self._check_variant(text, ctx, base_ap)
+            if c["dropped"]:
+                c["status"] = "dropped"
+            cands.append(c)
+        ok = [c for c in cands if not c.get("dropped")]
+        if not ok:
+            self.stop(7, "none of the fixer's variant fixes is usable: "
+                      + "; ".join(f"{c['id']}: {c['dropped']}" for c in cands), resume_next="fix")
+        if len(ok) == 1:
+            c = ok[0]
+            self._write_spec(self._var_text(c))
+            dropped = [f"{d['id']} ({d['dropped']})" for d in cands if d.get("dropped")]
+            ch = dict(c["change"])
+            if dropped:
+                ch["why"] = (ch.get("why") or c["hypothesis"] or "") + "; variants dropped: " + ", ".join(dropped)
+            return {"kind": "fix", "hypothesis": c["hypothesis"] or fx.get("hypothesis"), "change": ch,
+                    "ledger": c["ledger"] or fx.get("ledger"), "model": fx.get("model"),
+                    "agent_cost_usd": fx.get("agent_cost_usd")}
+        self.st["var"] = {"n": ctx["n"], "base": ctx["backup"], "cands": cands, "filmed": [], "done": [],
+                          "results": [], "symptom": self._symptom(), "led": self._ledger_request(),
+                          "hypothesis": fx.get("hypothesis")}
+        self.st["next"] = "var_dry"
+        return None
+
+    def _var_cand(self, k):
+        return next(c for c in self.st["var"]["cands"] if c["k"] == k)
+
+    def ph_var_dry(self):
+        v = self.st["var"]
+        c = next((c for c in v["cands"] if c["status"] == "pending"), None)
+        if c is None:
+            self.st["next"] = "var_rank"
+            return
+        if self.st["dry_runs_used"] >= self.kv["dry_run_cap"]:
+            if any(x["status"] == "scored" for x in v["cands"]):
+                for x in v["cands"]:
+                    if x["status"] == "pending":
+                        x.update(status="dropped", dropped=f"not scored: dry_run_cap={self.kv['dry_run_cap']} reached")
+                self.st["next"] = "var_rank"
+                return
+            self.stop(6, f"{self.st['dry_runs_used']} dry runs used, cap {self.kv['dry_run_cap']} (D-41), before "
+                         "any variant fix was scored", resume_next="var_dry")
+        self._login_ok("var_dry")
+        n = self.st["dry_runs_used"] + 1
+        run_id = self._fresh_run_id(f"{self.st['job']}-f{v['n']}v{c['k']}d{len(c['runs']) + 1}")
+        self.st["dry_runs_used"] = n
+        self.save()
+        self._write_spec(self._var_text(c))
+        try:
+            t0 = time.time()
+            _req, res = self._call_run("dry", run_id, n)
+            t1 = time.time()
+        finally:
+            shutil.copyfile(v["base"], self.st["spec_path"])
+        rd = self.run_dir(run_id)
+        self.timing.record("dry run (variant)", t0, t1, run_id=run_id, jev=L.jev_stats(rd), variant=c["id"],
+                           result="green" if res.get("ok") else f"failed at {res.get('failed_step')}: {res.get('reason')}")
+        if res.get("login_required") or res.get("error_class") == "lock_timeout":
+            self.st["dry_runs_used"] -= 1
+        self._classify(res, "var_dry")
+        planned = sum(1 for st in self.spec()["steps"] for a in st.get("actions", []) if a.get("op") in S.JEV_OPS)
+        sig = VW.signals(rd, res, planned)
+        sc, terms = VW.score(sig, VW.parse_weights(self.kv["variant_score_weights"]))
+        c["runs"].append({"run_id": run_id, "run_dir": rd, "signals": sig, "score": sc, "terms": terms})
+        if not res.get("ok"):
+            c["dry_fail"] = {"run_id": run_id, "run_dir": rd, "failed_step": res.get("failed_step"),
+                             "reason": res.get("reason")}
+        if not res.get("ok") or len(c["runs"]) >= self.kv["variant_dry_runs"]:
+            c["score"], c["dry_ok"] = VW.combine(c["runs"])
+            c["status"] = "scored"
+
+    def ph_var_rank(self):
+        v = self.st["var"]
+        ranked = VW.rank(v["cands"])
+        lines = [VW.breakdown(c) for c in v["cands"]]
+        if not ranked:
+            first = next((c for c in v["cands"] if c.get("dry_fail")), None) or {}
+            df = first.get("dry_fail") or {}
+            self.st["fix_source"] = {"kind": "dry run", "run_id": df.get("run_id"), "run_dir": df.get("run_dir"),
+                                     "failed_step": df.get("failed_step"),
+                                     "reason": "no variant fix passed its dry run: " + "; ".join(lines)}
+            self._var_close(None, "no variant passed its dry run; the base spec stays", lines)
+            self.st["next"] = "fix"
+            return
+        film = VW.to_film(ranked, self.kv["variant_margin"], self.kv["max_takes"] - self.st["takes_used"])
+        v["filmed"] = [c["k"] for c in film]
+        plan = (f"plan: film {', '.join(c['id'] for c in film)} (top score {ranked[0]['score']:.4f}, margin "
+                f"{self.kv['variant_margin']}, {self.kv['max_takes'] - self.st['takes_used']} takes left)")
+        v["plan"] = plan
+        self.say("variant fixes, ranked by jev:\n  " + "\n  ".join(lines + [plan]))
+        self.st["next"] = "var_film"
+        if self.attended:
+            self.stop(10, "the fixer saw real alternatives; jev dry runs ranked them. Film the plan, or choose one",
+                      resume_next="var_film", extra={"variants": lines + [plan]})
+
+    def ph_var_film(self):
+        v = self.st["var"]
+        todo = [k for k in v["filmed"] if k not in v["done"]]
+        if not todo or self.st["takes_used"] >= self.kv["max_takes"]:
+            self.st["next"] = "var_pick"
+            return
+        c = self._var_cand(todo[0])
+        self._write_spec(self._var_text(c))
+        self.st["dry_ok_hash"] = _sha_file(self.st["spec_path"])   # its scoring dry run was a full, green dry run
+        self.st["need_dry"] = False
+        ch = c["change"]
+        self.st["pending_changes"] = [f"variant {c['id']} of fix {v['n']} (jev score {c['score']:.4f}): "
+                                      f"{ch.get('what')} @ {ch.get('where')}: {ch.get('old')!r} -> {ch.get('new')!r} "
+                                      f"(why: {ch.get('why') or c['hypothesis']})"]
+        v["filming"] = c["k"]
+        self.st["next"] = "take"
+
+    def _var_judged(self, row, fc):
+        """Record a filmed variant's verdict; returns the next phase."""
+        v = self.st["var"]
+        c = self._var_cand(v.pop("filming"))
+        v["done"].append(c["k"])
+        v["results"].append({"k": c["k"], "id": c["id"], "take": row["take"], "run_id": row["run_id"],
+                             "hit": row["hit"], "verdict": row["verdict"], "violations": row["violations"],
+                             "warnings": row["warnings"], "frame_check": row["frame_check"],
+                             "review_findings": len(fc.get("blockers") or []) + len(fc.get("minors") or []),
+                             "score": c["score"], "fix_source": None if row["hit"] else self.st.get("fix_source")})
+        more = [k for k in v["filmed"] if k not in v["done"]]
+        return "var_film" if more and self.st["takes_used"] < self.kv["max_takes"] else "var_pick"
+
+    def ph_var_pick(self):
+        v = self.st["var"]
+        snap = S.snapshot_paths(self.spec())[0]
+        ref = open(snap, encoding="utf-8").read() if os.path.exists(snap) else open(v["base"], encoding="utf-8").read()
+        res = [dict(r, distance=VW.distance(self._var_text(self._var_cand(r["k"])), ref)) for r in v["results"]]
+        if not res:                               # nothing filmed (take cap): keep the base
+            self._var_close(None, "no variant was filmed", [VW.breakdown(c) for c in v["cands"]])
+            self.st["next"] = "cap"
+            return
+        res.sort(key=VW.pick_key)
+        win = res[0]
+        c = self._var_cand(win["k"])
+        self._write_spec(self._var_text(c))
+        self.st["dry_ok_hash"] = _sha_file(self.st["spec_path"])
+        filmed = "; ".join(f"{r['id']} take {r['take']} {r['verdict']} ({r['violations']} viol., {r['warnings']} "
+                           f"warn., {r['review_findings']} review findings, {r['distance']} lines from the approved "
+                           f"spec){' HIT' if r['hit'] else ''}" for r in res)
+        why = (f"{'the HIT' if win['hit'] else 'no filmed variant is a hit; the best'} by gate, frame check and viewer "
+               f"review (hit, violations, warnings, review findings, closeness to the approved spec, jev score): "
+               f"{filmed}")
+        lines = [VW.breakdown(x) for x in v["cands"]]
+        losers = [x for x in lines if not x.startswith(c["id"] + ":")]
+        ch = c["change"]
+        note = (f"variant {c['id']} of fix {v['n']}: {ch.get('what')} @ {ch.get('where')}: {ch.get('old')!r} -> "
+                f"{ch.get('new')!r} (why: {ch.get('why') or c['hypothesis']}); jev {lines[c['k'] - 1]}; variants "
+                f"that lost: {' | '.join(losers) or 'none'}")
+        fx = {"hypothesis": c["hypothesis"] or v.get("hypothesis"), "change": ch, "ledger": c["ledger"]}
+        fid = self._ledger_add(fx, note, [self.st["spec_path"]], "fix", symptom=v["symptom"], led=v["led"])
+        if fid:
+            try:
+                LG.set_evidence(LG.path(self.cfg, P.ROOT), fid,
+                                f"variant take {win['take']} ({win['run_id']}): gate {win['verdict']}, viewer review "
+                                f"{win['frame_check']}; {'HIT' if win['hit'] else 'no hit'}; filmed: {filmed}")
+            except OSError as e:
+                self.say(f"warning: FIXES-LEDGER evidence for {fid} not written ({e})")
+        self._var_close(win, why, lines, fid)
+        if win["hit"]:
+            self.st["hit_take"] = win["take"]
+            self.st["next"] = "deliver"
+        else:
+            self.st["fix_source"] = win["fix_source"]
+            self.st["next"] = "fix" if self.st["takes_used"] < self.kv["max_takes"] else "cap"
+
+    def _var_close(self, win, why, lines, fid=None):
+        v = self.st["var"]
+        if win is None:
+            shutil.copyfile(v["base"], self.st["spec_path"])
+            self.st["need_dry"] = True
+        h = {"event": "variants", "fix": v["n"], "time": _now_iso(), "lines": lines, "plan": v.get("plan"),
+             "filmed": [{k: r[k] for k in ("id", "take", "run_id", "verdict", "hit", "violations", "warnings",
+                                            "review_findings")} for r in v["results"]],
+             "kept": win["id"] if win else None, "kept_take": win["take"] if win else None,
+             "kept_hit": bool(win and win["hit"]), "why": why, "ledger": fid}
+        L.append_jsonl(self.take_log, h)
+        self.st.setdefault("var_history", []).append(h)
+        self.st["var"] = None
+        self.say(f"variants tried (fix {h['fix']}): " + " | ".join(lines) + f"; kept {h['kept'] or 'none'}: {why}")
+
+    def _best(self, rows):
+        """F-32, except that a kept hit variant is the delivered take (the variant pick already compared them)."""
+        hist = self.st.get("var_history") or []
+        if hist and hist[-1].get("kept_hit"):
+            r = next((r for r in rows if r.get("take") == hist[-1]["kept_take"] and "event" not in r), None)
+            if r:
+                return r, True
+        return L.best_take(rows, self._length())
+
     # ------------------------------------------------------------------------------------------- delivery
     def ph_deliver(self):
         t0 = time.time()
         rows = L.read_jsonl(self.take_log)
-        best, hit = L.best_take(rows, self._length())
+        best, hit = self._best(rows)
         dl = {"best_take": best["take"] if best else None, "hit": hit, "label": "HIT" if hit else "NOT A HIT",
               "video": None, "length": best.get("length") if best else None}
         if best and os.path.exists(os.path.join(best["run_dir"], "full.mp4")):
@@ -977,7 +1259,7 @@ class Job:
 
     def _write_report(self, stop=None):
         rows = L.read_jsonl(self.take_log)
-        best, hit = L.best_take(rows, self._length())
+        best, hit = self._best(rows)
         dl = self.st.get("delivery") or {}
         summ = L.summarize(self.timing.records())
         sp = self.spec()
@@ -1012,6 +1294,13 @@ class Job:
         else:
             lines.append("created items: none")
         lines.append("fix promotion proposals (F-35): none (S2)")
+        for h in self.st.get("var_history") or []:
+            lines += [f"variant fixes (fix {h['fix']}): variants tried, jev dry-run scores:"]
+            lines += [f"  - {x}" for x in h["lines"]]
+            lines.append(f"  filmed: " + ("; ".join(f"{f['id']} take {f['take']} {f['verdict']}"
+                                                   f"{' HIT' if f['hit'] else ''}" for f in h["filmed"]) or "none"))
+            lines.append(f"  kept {h['kept'] or 'none'}" + (f" (take {h['kept_take']}, ledger {h['ledger']})"
+                                                            if h["kept"] else "") + f"; why: {h['why']}")
         if best and best.get("review_minor"):
             lines += ["viewer review, minor findings (not blocking):"] + [f"  - {m}" for m in best["review_minor"]]
         if best and best.get("warnings"):
@@ -1025,6 +1314,8 @@ class Job:
         lines += ["", "## Timing (F-28)"] + L.summary_lines(summ)
         lines += ["", "## Take log (F-30)"]
         for r in rows:
+            if "take" not in r:
+                continue
             lines.append(f"  take {r['take']}: {r.get('verdict')} ({r.get('violations')} viol., {r.get('warnings')} warn.),"
                          f" viewer review {r.get('frame_check')}, length {r.get('length')}, change: {r.get('change')}, "
                          f"-> {r.get('decision')}")

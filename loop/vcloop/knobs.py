@@ -11,6 +11,8 @@ must be settable per spec without a code edit. M2's other internal values (check
 point_rechecks) are listed too for the same reason (1).
 """
 
+from . import variants as VW
+
 # name: (default, type, group, rule / source)
 TABLE = {
     # loop (F-11, F-13, D-41, C-18)
@@ -21,6 +23,13 @@ TABLE = {
     "run_timeout_s": (900, int, "loop", "wall-clock cap on one dry run / take / cleanup; the runner then finalises the "
                       "recording and ends, and the loop stops (C-18: a hung run never holds the browser forever)"),
     "flake_retakes": (1, int, "loop", "unchanged retakes the fixer may ask for, per job (F-15)"),
+    "max_variants": (3, int, "loop", "candidate fixes the fixer may return per fix when it sees real alternatives; "
+                     "1 = one fix only (owner 2026-09-25)"),
+    "variant_dry_runs": (1, int, "loop", "scoring dry runs per candidate; they count against dry_run_cap"),
+    "variant_margin": (0.05, float, "loop", "every candidate whose jev score is within this of the top score is "
+                       "filmed as its own take (within max_takes)"),
+    "variant_score_weights": (VW.DEFAULT_WEIGHTS, str, "loop", "weights of the jev signals in a candidate's score "
+                              "(loop/vcloop/variants.py)"),
     # jev runner (C-03 and M2 internal timings)
     "decisions_per_step": (6, int, "runner", "jev decisions per step before the step fails (C-03)"),
     "transient_retries": (2, int, "runner", "retries of stale-page / provider refusals (C-03)"),
@@ -102,9 +111,13 @@ def resolve(spec_knobs=None, run_knobs=None):
             src[k] = origin
     if vals["length_min_s"] > vals["length_max_s"]:
         raise KnobError("length_min_s is above length_max_s")
-    for k in ("max_takes", "dry_run_cap", "decisions_per_step"):
+    for k in ("max_takes", "dry_run_cap", "decisions_per_step", "max_variants", "variant_dry_runs"):
         if vals[k] < 1:
             raise KnobError(f"knob {k} must be >= 1")
+    try:
+        VW.parse_weights(vals["variant_score_weights"])
+    except ValueError as e:
+        raise KnobError(str(e))
     return vals, src
 
 
