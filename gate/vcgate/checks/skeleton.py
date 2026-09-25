@@ -95,6 +95,10 @@ def analyse_click(ctx, c, end_t):
 
 
 def run_clip(ctx):
+    for cv in ctx.record.get("covers") or []:
+        if cv.get("status") == "bridged":     # report only: the gate judges the bridged clip like any other
+            lab = f" \"{cv['label']}\"" if cv.get("label") else ""
+            ctx.note("Q-23", f"cutter: click{lab} at {cv.get('click_t', 0):.2f} s: {cv.get('summary')}")
     if ctx.ev is None:
         ctx.note("Q-23", "not judged: no event log (skeleton frames are counted per logged click)")
         return

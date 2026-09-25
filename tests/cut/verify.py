@@ -546,6 +546,16 @@ def verify_cover_units():
           " / ".join(x for x in last[-3:] if x.strip()) if p.returncode == 0 else p.stderr[-1500:])
 
 
+def verify_bridge_units():
+    """Long loading after a click (FX-31): hold 2.0 s + cut + house fade, at plan level and on synthetic takes through
+    the real cutter and gate (skeleton and black after a click PASS; black without a click FAILs Q-20)."""
+    p = subprocess.run([sys.executable, "-m", "unittest", "tests.cut.test_bridge"], cwd=ROOT, capture_output=True,
+                       text=True)
+    last = (p.stderr.strip().splitlines() or ["?"])
+    check("long loading bridged: cut + fade, gate PASS; black without a click FAILs (FX-31)", p.returncode == 0,
+          " / ".join(x for x in last[-3:] if x.strip()) if p.returncode == 0 else p.stderr[-1500:])
+
+
 def main():
     if not SPEC or not os.path.isdir(os.path.join(SPEC, "visual-baselines")):
         print("SKIP cut verify: needs the acceptance data (visual baselines, fixture clips), which are private and not "
@@ -569,6 +579,7 @@ def main():
     verify_frame_assignment(work)
     verify_empty_segment(work)
     verify_cover_units()
+    verify_bridge_units()
     print(f"\n{len(RESULTS) - len(FAILS)} passed, {len(FAILS)} failed" + (f": {FAILS}" if FAILS else ""))
     return len(FAILS)
 

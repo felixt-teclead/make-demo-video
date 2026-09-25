@@ -24,13 +24,21 @@ Frames are rendered in pure Python (rgb24) and piped to ffmpeg (libx264 High, yu
 +faststart). Identical consecutive frames are rendered once.
 
 Defects (dict, optional):
-  {"black": "<step>"}       1.5 s of black inserted right after the view change of that step's first action. The
+  {"black": "<step>"}       1.5 s of black inserted at that step's mark, before its first glide: no click within
+                            2.4 s before it, so it is no skeleton after a click and the cutter's Q-23 cover may not
+                            hide it (a black right after a click is covered with the pre-click frame, legitimately,
+                            and the viewer never sees it; a longer one is first shrunk by the standstill cut). The
                             black carries 24 sparse 4x4 px specks (0.03 % of the picture) aligned to the cutter's
                             160x90 thumbnail grid: the gate (Q-20: luma range < 12 at 480 px, 0.1 % extremes
                             ignored) sees solid black, but the cutter's blank test (160x90 thumbnail) does not, so
                             the stretch survives the cut and the gate FAILs Q-20 on that clip.
   {"black_pure": "<step>"}  the same stretch perfectly black; the real cutter drops it as a blank (Q-53).
   {"no_ripple": "<step>"}   the ripple of that step's first click is not drawn (gate FAIL Q-44 with an event log).
+  {"slow_black": "<step>"}  the step's first click loads for 3.4 s (SLOW_F) before its new view: black (solid for the
+                            gate's Q-20, with the `black` specks so the cutter does not drop it as blank) that
+                            flickers between luma 0 and 8 each frame, so the standstill cut does not shorten it.
+                            The cutter bridges it (hold 2.0 s + fade); the gate PASSes.
+  {"slow_skeleton": "<step>"} the same 3.4 s load as grey placeholder bars with a soft moving shimmer band.
 
 CLI: python3 synth_video.py RUN_DIR STEPS_JSON [--defects JSON] [--landing-hold S] [--t0 EPOCH] [--url URL]
      (STEPS_JSON / JSON: a file path or an inline JSON string)
@@ -54,6 +62,7 @@ HOLD_AFTER_CLICK_F = 17  # the hold starts once the ripple is gone
 TYPE_F = 24              # 0.8 s of typing
 HOLD_AFTER_TYPE_F = 9
 BLACK_F = 45             # 1.5 s black defect
+SLOW_F = 102             # 3.4 s slow load after a click (slow_black / slow_skeleton)
 
 # The demo cursor's arrow fill (vc-v1-m6a-gate gate/vcgate/checks/cursor.py ARROW, the fill of the spec's
 # cursor.png at 1:1); tip = top left.
@@ -247,13 +256,29 @@ def _typed(view, target, n):
     return buf
 
 
-def _black(pure):
-    buf = bytearray(W * H * 3)
+def _black(pure, level=0):
+    buf = bytearray(bytes([level]) * (W * H * 3))
     if not pure:
         # 24 specks of 4x4 px, each fully inside one 12x12 cell of the cutter's 160x90 thumbnail
         for j in range(4):
             for i in range(6):
                 _fill(buf, 12 * (20 + 24 * i) + 4, 12 * (15 + 18 * j) + 4, 4, 4, (255, 255, 255))
+    return buf
+
+
+def _slow(kind, k):
+    """Frame k of a slow load: flickering black (specks as in _black) or a skeleton with a moving shimmer band."""
+    if kind == "slow_black":
+        return _black(False, 8 if k % 2 else 0)
+    buf = bytearray(bytes((226, 227, 229)) * (W * H))
+    _fill(buf, 0, 0, W, 64, (214, 215, 218))
+    for i in range(8):
+        _fill(buf, 360, 120 + i * 110, 900 - (i % 3) * 180, 40, (212, 213, 216))
+    x0 = (k * 60) % (W + 240) - 240
+    for i, v in enumerate((230, 234, 238, 242, 242, 238, 234, 230)):     # soft steps: no sharp edge (< 24 luma)
+        xa, xb = max(0, x0 + 30 * i), min(W, x0 + 30 * (i + 1))
+        if xb > xa:
+            _fill(buf, xa, 0, xb - xa, H, (v, v, v + 2))
     return buf
 
 
@@ -303,7 +328,7 @@ def _ffmpeg():
 def build_take(run_dir, steps, *, landing_hold=1.2, defects=None, t0=1727200000.0,
                url="https://app.example.test/"):
     defects = dict(defects or {})
-    unknown = set(defects) - {"black", "black_pure", "no_ripple"}
+    unknown = set(defects) - {"black", "black_pure", "no_ripple", "slow_black", "slow_skeleton"}
     if unknown:
         raise ValueError(f"unknown defects: {sorted(unknown)}")
     names = [s["name"] for s in steps]
@@ -363,6 +388,9 @@ def build_take(run_dir, steps, *, landing_hold=1.2, defects=None, t0=1727200000.
         if a["step"] not in step_seen:
             step_seen.add(a["step"])
             marks.append(ev("mark", len(frames), name=a["name"], step=a["step"], url=url))
+        black = a["ai"] == 0 and a["name"] in (defects.get("black"), defects.get("black_pure"))
+        if black:
+            emit(BLACK_F, vkey=("black", a["name"] == defects.get("black_pure")))
         # glide
         g = len(frames)
         tgt = a["target"]
@@ -374,14 +402,13 @@ def build_take(run_dir, steps, *, landing_hold=1.2, defects=None, t0=1727200000.
         emit(REST_F)
         c = len(frames)
         first = a["ai"] == 0
-        black = first and a["name"] in (defects.get("black"), defects.get("black_pure"))
-        black_key = ("black", a["name"] == defects.get("black_pure")) if black else None
         nxt = ("v", i + 1, 0)
         if a["kind"] == "click":
             ripple = not (first and defects.get("no_ripple") == a["name"])
             ev("click", c, step=a["step"], label=a["label"], x=tgt[0], y=tgt[1], glide_t=round(t0 + g / FPS, 6),
                click_t=round(t0 + c / FPS + 0.12, 6))
-            seq = [view] * VIEW_AFTER_F + ([black_key] * BLACK_F if black else []) + [nxt]
+            slow = next((k for k in ("slow_black", "slow_skeleton") if first and defects.get(k) == a["name"]), None)
+            seq = [view] * VIEW_AFTER_F + ([("load", slow, j) for j in range(SLOW_F)] if slow else []) + [nxt]
             n_pre = max(HOLD_AFTER_CLICK_F, len(seq))
             for k in range(n_pre):
                 vk = seq[min(k, len(seq) - 1)]
@@ -392,7 +419,7 @@ def build_take(run_dir, steps, *, landing_hold=1.2, defects=None, t0=1727200000.
             for k in range(1, TYPE_F + 1):
                 emit(1, vkey=("v", i, int(math.ceil(27 * k / TYPE_F))))
             typed = ("v", i, 27)
-            seq = [typed] * VIEW_AFTER_F + ([black_key] * BLACK_F if black else []) + [nxt]
+            seq = [typed] * VIEW_AFTER_F + [nxt]
             for k in range(max(HOLD_AFTER_TYPE_F, len(seq))):
                 emit(1, vkey=seq[min(k, len(seq) - 1)])
         view = nxt
@@ -410,6 +437,8 @@ def build_take(run_dir, steps, *, landing_hold=1.2, defects=None, t0=1727200000.
         if key not in views:
             if key[0] == "black":
                 views[key] = _black(key[1])
+            elif key[0] == "load":
+                return _slow(key[1], key[2])
             elif key[2] == 0:
                 t, k = targets.get(key[1], (None, None))
                 views[key] = _view(f"{key[1]}|{steps[0]['name']}|view", t, k)

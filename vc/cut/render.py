@@ -67,6 +67,17 @@ def render(raw, clips, width, height, workdir, factor, preset="veryfast", fade_n
                              f"setpts=N/{FPS}/TB[pi{i}_{j}]")
                 chain = (f"[d{i}_{j}][pi{i}_{j}]overlay=x={pt['x']}:y={pt['y']}:eof_action=pass:format=auto:"
                          f"enable='between(n\\,{cv['k0']}\\,{cv['k0'] + pt['n'] - 1})'")
+            fd = cv.get("fade")
+            if fd:
+                # long load bridged: the held frame fades out over the live settled view, frame j of the fade at
+                # opacity 1 - j/n (the site-switch fade's shape; j = 0 is the last held frame)
+                inputs += ["-loop", "1", "-framerate", str(FPS), "-t", "%.4f" % (fd["n"] / FPS), "-i", cv["png"]]
+                fi = sum(1 for x in inputs if x == "-i") - 1
+                graph.append(chain + f"[e{i}_{j}]")
+                graph.append(f"[{fi}:v]format=rgba,fade=t=out:s=0:n={fd['n']}:alpha=1,"
+                             f"tpad=start={fd['k']}:start_mode=clone,setpts=N/{FPS}/TB[fi{i}_{j}]")
+                chain = (f"[e{i}_{j}][fi{i}_{j}]overlay=x=0:y=0:eof_action=pass:format=auto:"
+                         f"enable='between(n\\,{fd['k']}\\,{fd['k'] + fd['n'] - 1})'")
         if any(a > 0 for a in c["badge"]):
             if badge_png is None:
                 badge_png, g = make_badge(os.path.join(workdir, "badge.png"), factor, width)

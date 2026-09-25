@@ -412,3 +412,55 @@ owner decision.
 - scope guess: COMMON
 - lives in: core code (loop)
 - owner decision: owner-requested 2026-09-25 (variants; jev scores, not the fixer)
+
+### FX-30 Loop end-to-end test plants a black the cutter may not legally cover
+- date: 2026-09-25
+- case/spec: tests only (loop e2e scenarios b, c, e2); no gate, cutter or loop behaviour change
+- symptom: full `bin/vc-selftest` failed loop-e2e since 229547e (FX-25): scenarios b, c and e2 got a gate PASS on
+  take 1 although the synthetic take carries a planted 1.5 s black (bisected cp-B-s1-candidate..cp-B-variants;
+  same on main v1.1; `--quick` never runs this suite)
+- root cause: stale scenario, not a missed defect. The black was planted between the click and the new view, which
+  Q-23 defines as skeleton frames (old view gone, <= 25 % settled edges). The owner-approved cover (FX-25) now covers
+  up to 2.0 s of them with the pre-click frame and a drawn ripple: cut record of bpmn `status covered,
+  skeleton_frames 45, src_frames 167-212`, so the delivered video holds no black at all. Before FX-25 the cover was
+  only skipped by chance (`seam 240.6 luma at the hole edge`, black showing through the 72 px live hole). A 2.5 s
+  black there is not caught either: the standstill cut (Q-50, 1.5 s cap) shrinks it to 47 frames, then it is covered.
+- change: `tests/fakes/synth_video.py` plants the `black` defect at the step's mark, before its first glide (no
+  click within 2.4 s before it), like the real fixture `q20-black-1p5s.mp4` ("no click in the stretch"); the gate
+  FAILs Q-20 on it (`BLACK solid stretch of 45 frames (1.50 s)` in clip bpmn)
+- evidence: `tests/loop/e2e_real.py` a-e all met; `bin/vc-selftest` 14/14, `--quick` 9/9, `bin/vc-gate-fixtures` 25/25
+- scope guess: TEST-ONLY
+- lives in: tests (fakes)
+- owner decision: none needed (no behaviour change); open question for the owner: should the cover decline a
+  solid (Q-20) stretch after a click instead of hiding it? Today it hides up to 2.0 s of black load as a frozen view.
+
+### FX-31 Long loading after a click: hold 2.0 s, cut the rest of the wait, fade into the settled view
+- date: 2026-09-25
+- case/spec: all (Q-23 cover; owner decision on loading after a click, house style)
+- symptom: a load that settles more than 2.0 s after the first skeleton frame was left uncovered ("cover longer than
+  2.0 s", skipped), so the gate failed Q-23 (or Q-20 for a black load) and the loop spent a retake on it; a load
+  still running when the 2.4 s window ended was not recognised at all
+- root cause: the cover had only one answer beyond its 2.0 s cap (give up); the owner allows covering anything
+  shown while loading after a click and wants the excess wait cut out and bridged
+- change: `vc/cut/cover.py` plan_covers: the cover holds 2.0 s (drawn ripple as before), the delivered frames up to
+  the settled view are removed (drop `loading bridged`, a splice at the fade) and the held frame fades out over the
+  live settled view in the site-switch fade's shape (crossfade_s frames, (1 - j/n) held + j/n live); a load still
+  running at the window's end (480x270 pre-check) is followed to the next action or clip end (max 10 s); a load that
+  never settles there is left alone (Q-23 still fails it); holds are never trimmed (the cut starts where an
+  overlapping logged hold ends; a hold lasting until settle keeps the plain cover); typing or a span in the frames to
+  cut: skipped. `vc/cut/render.py` fade overlay; `vc/cut/cutter.py` guard + `params.skeleton_cover.long_load`;
+  record `status "bridged"`, summary "loading 3.4 s: cut to 2.0 s + fade", printed by the gate as a Q-23 info line
+  (report only, `gate/vcgate/checks/skeleton.py`; no judge change); review sheets sample bridged windows;
+  `tests/fakes/synth_video.py` defects `slow_black`, `slow_skeleton`
+- evidence: `tests/cut/test_bridge.py` (8 tests, run by cut-verify): rendered fade weights 0.17/0.33/0.50/0.67/0.83
+  (house fade 1/6..5/6); synthetic takes through the real cutter and gate: 3.4 s skeleton and 3.4 s black after a
+  click -> bridged, gate PASS with 0 warnings; 1.5 s black without a click -> gate FAIL Q-20 (fixture
+  q20-black-1p5s and loop-e2e b/c unchanged). Real frames, gate unchanged: recuts of c1 t1, c2 t1,
+  c2 t1, c3 t1 at the real cap give the same covers as before (no bridge needed); forced with the cap
+  at 0.3 s, c2 070742 "Prozesse" and "Öffnen" and c3 074542 "Öffnen" are bridged and the gate reports no Q-20/Q-21/
+  Q-23/Q-30/Q-31 finding (the fade's first frame is a Q-30 jump explained by its splice; the remaining c2 Q-71 in
+  "suche" is pre-existing), c1 "Urlaubsantrag" is held through its step hold (PASS)
+- scope guess: COMMON
+- lives in: core code (cutter)
+- owner decision: owner-requested 2026-09-25 (loading after a click: cover, cut the excess, house fade); open for the
+  owner: a logged hold that runs into a long load keeps the pre-click frame beyond 2.0 s (holds are never trimmed)

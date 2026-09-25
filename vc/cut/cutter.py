@@ -113,7 +113,8 @@ def _cut(run_dir, out_dir, final_dir, is_recut, factor, keep_work, preset, cross
 
     # Q-23 skeleton cover (S2): decided on the delivered frame sequence, drawn in the render
     t = time.time()
-    cover_mod.plan_covers(raw, an, plans, [_cover_clicks(p, tl) for p in plans], W, H, work)
+    cover_mod.plan_covers(raw, an, plans, [_cover_clicks(p, tl) for p in plans], W, H, work, fade_n,
+                          guard=lambda a, b: _guard(tl, a, b))
     timing["cover_s"] = round(time.time() - t, 2)
     for p in plans:
         clips.append({"fmap": p["fmap"], "badge": p["badge"], "path": p["path"], "covers": p["cover_render"]})
@@ -141,7 +142,9 @@ def _cut(run_dir, out_dir, final_dir, is_recut, factor, keep_work, preset, cross
                    "encoder": "libx264 high yuv420p crf18 " + preset,
                    "skeleton_cover": {"max_s": cover_mod.COVER_MAX_S, "seam_max": cover_mod.SEAM_MAX,
                                       "ripple": "drawn", "ripple_s": cover_mod.RIPPLE_S,
-                                      "ripple_d": cover_mod.RIPPLE_D}},
+                                      "ripple_d": cover_mod.RIPPLE_D,
+                                      "long_load": {"hold_s": cover_mod.COVER_MAX_S, "fade_frames": fade_n,
+                                                    "follow_max_s": cover_mod.EXTEND_MAX_S}}},
         "clips": record_clips, "joins": jr["joins"], "full": "full.mp4", "full_duration": jr["full_duration"],
         "full_frames": jr["full_frames"], "full_expected_frames": jr["expected_frames"], "timing": timing,
     }
@@ -191,6 +194,16 @@ def _cover_clicks(p, tl):
             if k is not None:
                 stops.append(k)
     return {"clicks": clicks, "stops": stops}
+
+
+def _guard(tl, a, b):
+    """For cutting raw frames [a, b) out of a long load: (why not, or None; raw end of the last overlapping hold, or
+    None)."""
+    for x in list(tl.typing) + list(tl.spans):
+        if fr(x["start"]) < b and fr(x["end"]) > a:
+            return f"a {x['type']} lies in it", None
+    ends = [h["end"] for h in tl.holds if h["start"] < b and h["end"] > a]
+    return None, (max(ends) if ends else None)
 
 
 def _map_frame(fmap, f):

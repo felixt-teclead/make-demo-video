@@ -196,6 +196,10 @@ All of the spec's default numbers are kept unless listed here. Every change was 
     limit is not 35 %);
   - the click position (110 px exclusion) is the logged `x, y`, else the click's own ripple (within 0.5 s), else none;
   - skeleton frames per click need not be contiguous; one violation per click (Q-06).
+  - a long load the cutter bridged (FX-31: held frame 2.0 s, wait cut out, house fade into the settled view) is
+    judged like any other clip, no special case: the held frames equal the pre-click frame (not gone), the fade frames
+    are plain blends. The record's summary is printed as an info line ("cutter: click "X" at 0.53 s: loading 3.4 s:
+    cut to 2.0 s + fade"). The fade's first frame is a Q-30 hard jump, explained by the splice there.
   Measured: q23-11f → 11 frames at 1.30–1.67 s (FAIL); q23-1f → 1 frame at 1.33 s (WARN, take passes); 0 frames for all
   7 clicks of the clean take and for the clicks of q44/q14/q30 fixtures.
 
@@ -231,4 +235,4 @@ critical path (schritt, 3 clicks) 0.8–1.05 s. Re-measure on an idle host. The 
 - **Q-48 (pressed state) and Q-71 (stray browser interface)** are S2 but **Look** checks (sampled frames, frame-check
   model); the deterministic gate runs no model (Q-95). Since 2026-09-25 the gate covers one Q-71 case by pixels:
   tooltip-like boxes (see Build notes); URL bubbles, banners and toasts remain Look.
-- **Q-23 cover** (the cutter's optional skeleton cover, a fix direction) is not built; the gate only measures.
+- **Q-23 cover** is built in the cutter (docs/cut-interfaces.md); the gate only measures the delivered clip.

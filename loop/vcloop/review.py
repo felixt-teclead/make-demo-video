@@ -79,7 +79,7 @@ def sample_times(rec):
             elif e.get("clip_end") is not None:
                 add(off + e["clip_t"], f"{e.get('type')} start", name, prio=2)
                 add(off + e["clip_end"], f"{e.get('type')} end", name, prio=2)
-        windows = [(w, "cover") for w in c.get("covers", []) if w.get("status") == "covered"]
+        windows = [(w, "cover") for w in c.get("covers", []) if w.get("status") in ("covered", "bridged")]
         windows += [(w, "speed-up") for w in c.get("speedups", [])]
         windows += [(w, "sped-up") for w in c.get("kept", []) if float(w.get("factor") or 1) > 1.0
                     and not c.get("speedups")]

@@ -28,6 +28,13 @@ ripple shows, the drawn ripple must match the live one (mean |live - drawn| luma
 otherwise the cover is skipped and the reason logged. No ring found in the live frames: the cover draws no ripple
 (there is none to keep). Every decision is logged in the cut record (clip `covers[]`).
 
+Long loading (owner decision 2026-09-25, house style): when the view settles only after more than the cover may hold
+(2.0 s from the first skeleton frame), the cover holds 2.0 s, the rest of the wait is cut out and the held pre-click
+frame cross-fades into the settled view in the site-switch fade's own shape (linear, crossfade_s frames: frame j
+shows (1 - j/n) * held + j/n * live). A load still running when the 2.4 s window ends is followed up to the next
+action (at most EXTEND_MAX_S); one that never settles before it is left alone (Q-23 still fails it). Status
+"bridged" in `covers[]`, with the summary "loading 3.4 s: cut to 2.0 s + fade".
+
 Stdlib only (no numpy): frames are bytes; only the change-area pixels are visited.
 """
 import math
@@ -69,6 +76,7 @@ FADE_EXTRA = 6          # live frames decoded ahead for the fade tracking      #
 ARROW = ((0, 0), (0, 17.6), (4.1, 13.6), (8, 21.6), (11.1, 20.2), (7.5, 12.7), (14.85, 12.5))
 ARROW_PAD = 1.5         # stroke (0.75) + anti-aliasing
 PRECHECK_AREA = 0.01    # cheap 480x270 pre-check: below 1 % change area the click is not analysed
+EXTEND_MAX_S = 10.0     # a load still running at the window's end is followed this far (to the next action)
 
 
 def _disc_outside(w, h, cx, cy, r):
@@ -445,16 +453,19 @@ def ripple_seam(live, drawn, box, cx, cy, s, px=1.0):
 
 # ---------------------------------------------------------------------------------------------------- on a take
 def click_windows(plan, clicks_k, stops_k):
-    """Delivered windows (f0, fe) per click of one clip, as the gate cuts them: pre-click frame f0 = kc - 1, last
-    frame fe = min(kc + 2.4 s, next glide/click - 1, K - 1)."""
+    """Delivered windows (f0, fe, fx) per click of one clip, as the gate cuts them: pre-click frame f0 = kc - 1, last
+    frame fe = min(kc + 2.4 s, next glide/click - 1, K - 1); fx: the same without the 2.4 s limit (at most
+    EXTEND_MAX_S), where a long load is followed until it settles."""
     K = len(plan["fmap"])
     out = []
     for c in clicks_k:
         kc = c["k"]
         nxt = [s for s in stops_k if s > kc]
-        fe = min([kc + int(round(WINDOW_S * FPS)), K - 1] + ([min(nxt) - 1] if nxt else []))
+        lim = [K - 1] + ([min(nxt) - 1] if nxt else [])
+        fe = min([kc + int(round(WINDOW_S * FPS))] + lim)
+        fx = min([kc + int(round(EXTEND_MAX_S * FPS))] + lim)
         f0 = max(0, kc - 1)
-        out.append((c, f0, fe))
+        out.append((c, f0, fe, fx))
     return out
 
 
@@ -485,55 +496,123 @@ def _precheck(an, fmap, f0, fe, x, y, W):
     return len(idx) / float(MW * MH) >= PRECHECK_AREA
 
 
-def plan_covers(raw, an, plans, clip_clicks, W, H, work):
+def _still_loading(an, fmap, f0, fe, fx, x, y, W):
+    """Cheap test on the analysis' 480x270 frames: is the window's last frame fe a skeleton frame of the view at fx
+    (the load still runs when the Q-23 window ends)?"""
+    from .analyze import MW, MH
+    s = MW / float(W)
+    r = detect([an.mid(fmap[f0]), an.mid(fmap[fe]), an.mid(fmap[fx])], MW, MH,
+               None if x is None else x * s, None if y is None else y * s, MW / 1920.0)
+    return 1 in r["skeleton"]
+
+
+def _decode_window(raw, fm, f0, fe, w, h):
+    raw_frames = decode_range(raw, fm[f0], fm[fe], w, h)
+    return [raw_frames[fm[k] - fm[f0]] for k in range(f0, fe + 1)]
+
+
+def bridge_summary(loading_frames, hold_frames):
+    return (f"loading {loading_frames / FPS:.1f} s: cut to {hold_frames / FPS:.1f} s + fade")
+
+
+def plan_covers(raw, an, plans, clip_clicks, W, H, work, fade_n=6, guard=None):
     """For every clip plan and its clicks, decide the covers. clip_clicks[i]: list of {k, x, y, t, label} plus
     stops (delivered frames of every click and glide) under key 'stops'. Sets plan['covers'] (the record entries)
-    and plan['cover_render'] ([{k0, k1, png, patch}]) on each plan. Returns the list of cover images to make."""
+    and plan['cover_render'] ([{k0, k1, png, patch, fade}]) on each plan. A bridged long load removes delivered
+    frames: plan fmap/speed/badge/kept/drops are edited in place. guard(src_a, src_b) -> (why, hold_end): why raw
+    frames [src_a, src_b) may not be cut out (typing, a span) or None, and the raw end of the last logged hold that
+    overlaps them (the cut then starts there) or None. Returns the list of cover images made."""
     w, h = (W // 2) & ~1, (H // 2) & ~1
     pos = w / float(W)         # click position (px of this video) -> half resolution
     scale = w / 1920.0         # thresholds are px of the 1920-wide video (Q conventions)
+    max_frames = int(round(COVER_MAX_S * FPS))
     jobs = []
     for p, cc in zip(plans, clip_clicks):
         p["covers"], p["cover_render"] = [], []
-        for c, f0, fe in click_windows(p, cc["clicks"], cc["stops"]):
+        for c, f0, fe, fx in click_windows(p, cc["clicks"], cc["stops"]):
             if fe - c["k"] < 2 or f0 >= c["k"]:
                 continue
             if not _precheck(an, p["fmap"], f0, fe, c.get("x"), c.get("y"), W):
                 continue
-            jobs.append((p, c, f0, fe))
+            jobs.append((p, c, f0, fe, fx))
     if not jobs:
         return []
     images = []
     px = W / 1920.0            # ripple geometry: px of the 1920-wide video
-    for p, c, f0, fe in jobs:
+    removed = {}               # id(plan) -> delivered frames cut out so far (later windows shift by that)
+    for p, c, f0, fe, fx in jobs:
+        sh = removed.get(id(p), 0)
+        f0, fe, fx = f0 - sh, fe - sh, fx - sh
         fm = p["fmap"]
-        raw_frames = decode_range(raw, fm[f0], fm[fe], w, h)
-        frames = [raw_frames[fm[k] - fm[f0]] for k in range(f0, fe + 1)]
+        frames = _decode_window(raw, fm, f0, fe, w, h)
         x, y = c.get("x"), c.get("y")
         cx, cy = (None, None) if x is None or y is None else (float(x) * pos, float(y) * pos)
-        d = decide(frames, w, h, cx, cy, scale)
+        d = decide(frames, w, h, cx, cy, scale, max_frames=10 ** 9)
+        extended = False
+        if d["status"] != "covered" and fx > fe and _still_loading(an, fm, f0, fe, fx, x, y, W):
+            # the view still changes after the window: a load that runs on; judge it against the view it settles to
+            d2 = decide(_decode_window(raw, fm, f0, fx, w, h), w, h, cx, cy, scale, max_frames=10 ** 9)
+            if d2["status"] == "covered" or (d["status"] == "none" and d2["status"] != "none"):
+                d, fe, extended = d2, fx, True
         if d["status"] == "none":
             continue
-        entry = {"click_t": round(c["k"] / FPS, 4), "src_t": c.get("t"), "label": c.get("label"),
+        entry = {"click_t": round((c["k"] - sh) / FPS, 4), "src_t": c.get("t"), "label": c.get("label"),
                  "x": x, "y": y, "status": d["status"], "reason": d["reason"],
                  "skeleton_frames": d["skeleton_frames"], "seam": None, "ripple": None,
                  "change_area": d["area"], "pre_frame": f0, "pre_src_frame": fm[f0]}
+        if extended:
+            entry["window_extended_to"] = fe
         if "k0" in d:
             entry["skeleton_run"] = [f0 + d["k0"], f0 + d["skeleton_end"]]
-        rp = None
+        k0 = k1 = kh = None
         if d["status"] == "covered":
             k0, k1 = f0 + d["k0"], f0 + d["k1"]
-            rp = ripple_plan(raw, fm, c, f0, k0, k1, fe, W, H, px, os.path.join(work, f"cover-{len(images):02d}"))
+            kh = min(k1, k0 + max_frames)
+            held_by = None
+            if k1 > kh:
+                why, hold_end = None, None
+                if k1 + fade_n - 1 > len(fm) - 1:
+                    why = "the settled view is shorter than the fade"
+                elif guard is not None:
+                    why, hold_end = guard(fm[kh - 1] + 1, fm[k1])
+                if why:
+                    entry.update(status="skipped", reason=f"loading {(k1 - k0) / FPS:.1f} s is longer than "
+                                                          f"{COVER_MAX_S} s and cannot be cut: {why}")
+                elif hold_end is not None:
+                    # a hold is never trimmed (Q-51): the cut starts where the hold ends, the cover holds until then
+                    kh = next((k for k in range(kh, k1) if fm[k] >= hold_end), k1)
+                    held_by = hold_end
+        if entry["status"] == "covered":
+            cc = dict(c, k=c["k"] - sh)
+            rp = ripple_plan(raw, fm, cc, f0, k0, kh, fe, W, H, px, os.path.join(work, f"cover-{len(images):02d}"))
             entry["ripple"], entry["seam"] = rp["record"], rp["seam"]
             if rp["seam"] is not None and rp["seam"] > SEAM_MAX:
                 entry.update(status="skipped", reason=f"seam {rp['seam']:.1f} luma between the live and the drawn "
                                                       f"ripple > {SEAM_MAX:g}")
         if entry["status"] == "covered":
-            entry.update(frames=[k0, k1], clip_start=round(k0 / FPS, 4), clip_end=round(k1 / FPS, 4),
-                         covered_frames=k1 - k0, src_frames=[fm[k0], fm[k1 - 1] + 1])
             img = os.path.join(work, f"cover-{len(images):02d}.png")
             images.append({"raw_frame": fm[f0], "path": img})
-            p["cover_render"].append({"k0": k0, "k1": k1, "png": img, "patch": rp["patch"]})
+            render_cv = {"k0": k0, "k1": kh, "png": img, "patch": rp["patch"]}
+            entry.update(frames=[k0, kh], clip_start=round(k0 / FPS, 4), clip_end=round(kh / FPS, 4),
+                         covered_frames=kh - k0, src_frames=[fm[k0], fm[kh - 1] + 1])
+            if k1 > kh:
+                cut_n = k1 - kh
+                _cut_delivered(p, kh, k1)
+                removed[id(p)] = sh + cut_n
+                render_cv["fade"] = {"k": kh - 1, "n": fade_n}
+                entry.update(status="bridged", loading_frames=k1 - k0, loading_s=round((k1 - k0) / FPS, 4),
+                             hold_s=round((kh - k0) / FPS, 4), removed_frames=cut_n,
+                             removed_s=round(cut_n / FPS, 4), fade_frames=[kh, kh + fade_n - 1],
+                             fade_s=round(fade_n / FPS, 4), clip_end=round((kh + fade_n - 1) / FPS, 4),
+                             summary=bridge_summary(k1 - k0, kh - k0),
+                             reason=f"the view settled {(k1 - k0) / FPS:.2f} s after the first skeleton frame "
+                                    f"(cover max {COVER_MAX_S} s): the rest of the wait is cut out and the held "
+                                    f"frame cross-fades into the settled view"
+                                    + (" (held until a logged hold ends: holds are never trimmed)" if held_by else ""))
+            elif held_by is not None:
+                entry["reason"] = (f"loading {(k1 - k0) / FPS:.1f} s is longer than {COVER_MAX_S} s but a logged hold "
+                                   f"lasts until the view is settled: covered through the hold, nothing cut")
+            p["cover_render"].append(render_cv)
         else:
             entry.update(frames=None, covered_frames=0,
                          skeleton_window=[f0 + d["k0"], f0 + d["k1"]] if "k0" in d else None)
@@ -541,6 +620,20 @@ def plan_covers(raw, an, plans, clip_clicks, W, H, work):
     if images:
         make_images(raw, images)
     return images
+
+
+def _cut_delivered(p, a, b):
+    """Remove delivered frames [a, b) from a clip plan (fmap, speed, badge) and the raw frames between the frames
+    that now meet from its kept list; log the drop."""
+    fm = p["fmap"]
+    lo, hi = fm[a - 1] + 1, fm[b]
+    for key in ("fmap", "speed", "badge"):
+        if key in p:
+            del p[key][a:b]
+    if "kept" in p:
+        p["kept"] = [f for f in p["kept"] if not lo <= f < hi]
+    if hi > lo:
+        p.setdefault("drops", []).append({"src_start": lo, "src_end": hi, "reason": "loading bridged"})
 
 
 def decode_rgb(raw, s, e, box):

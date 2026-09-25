@@ -68,7 +68,7 @@ Per clip (all `clip_*` times are delivered clip seconds, `src_*` are raw seconds
   with `all_standstill: true`, so the gate fails it on Q-14
 - `freezes[]`, `bridges[]`: always empty in v0.1 (no freeze-frames, no synthetic cursor bridge)
 - `covers[]` (Q-23 skeleton cover, below): one entry per click with skeleton frames `{click_t, src_t, label, x, y,
-  status: "covered"|"skipped", reason, skeleton_frames, skeleton_run[k0,k_end), seam, ripple, change_area,
+  status: "covered"|"bridged"|"skipped", reason, skeleton_frames, skeleton_run[k0,k_end), seam, ripple, change_area,
   pre_frame, pre_src_frame}`; `ripple` = `{found, delta_s, start_s, fit_mismatch, blue_px, refine_seam, box,
   drawn_frames}` (the drawn ripple's fit; null when skipped before drawing); covered: `frames[k0,k1)` (delivered,
   k1 = the settled frame), `clip_start, clip_end, covered_frames, src_frames`; skipped: `frames: null,
@@ -133,6 +133,18 @@ frame sequence (the clip's frame map, so the window is the one the gate judges):
 - skipped (frames left, reason logged) when: the seam, i.e. the mean |live - drawn| luma over the ripple's disc on
   the last live frame before the cover, exceeds 16; the cover until the settled view is longer than 2.0 s; the view
   already changed before the skeleton run; or the click has no logged position.
+- long loading (owner decision 2026-09-25, FX-31): when the view settles more than 2.0 s after the first skeleton
+  frame, the cover holds 2.0 s (ripple drawn as above), the rest of the wait is cut out (delivered frames removed,
+  drop reason `loading bridged`, a splice at the fade) and the held pre-click frame fades out over the live settled
+  view in the site-switch fade's shape: crossfade_s frames (6 at 0.2 s), frame j at (1 - j/n) held + j/n live, j = 0
+  being the last held frame, so 5 blend frames then live. A load still running when the 2.4 s window ends (the
+  window's last frame is a skeleton of the view at the next action, checked on the 480x270 analysis frames) is
+  followed up to the next click/glide or the clip end, at most 10 s; a load that never settles before that is left
+  alone (the gate fails it on Q-23). Not cut when a hold, typing or a span lies in the frames to remove (skipped,
+  reason logged). Record: `status: "bridged"`, `frames[k0, k0+60)` (held), `fade_frames[a, b)` (blend frames),
+  `loading_s, hold_s, removed_frames, removed_s, fade_s, summary` ("loading 3.4 s: cut to 2.0 s + fade"),
+  `window_extended_to` when the window was followed on; `params.skeleton_cover.long_load`. The gate prints the
+  summary as a Q-23 info line.
 - The gate judges the covered clip as any other (no special case). Real takes (re-cut 2026-09-25, drawn ripple):
   c1 064809 t1 "Urlaubsantrag" frames 67-78 covered (seam 8.1); c2 064810 t1 "Prozesse" 73-85 (7.0) and
   "Bestellanforderung" 21-35 (7.4); c2 070742 t1 "Prozesse" 72-103 (skeleton run 72-94 + 9 shell frames; 7.6; was
